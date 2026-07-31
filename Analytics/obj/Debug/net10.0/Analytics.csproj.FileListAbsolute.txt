@@ -38,3 +38,4 @@ C:\Users\samu0\RiderProjects\Analytics\Analytics\obj\Debug\net10.0\refint\Analyt
 C:\Users\samu0\RiderProjects\Analytics\Analytics\obj\Debug\net10.0\Analytics.pdb
 C:\Users\samu0\RiderProjects\Analytics\Analytics\obj\Debug\net10.0\Analytics.genruntimeconfig.cache
 C:\Users\samu0\RiderProjects\Analytics\Analytics\obj\Debug\net10.0\ref\Analytics.dll
+C:\Users\samu0\RiderProjects\Analytics\Analytics\obj\Debug\net10.0\Analytics.sourcelink.json

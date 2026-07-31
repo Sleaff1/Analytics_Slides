@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -22,6 +22,7 @@ namespace AutomacaoAnalyticsRift
     public class Cliente
     {
         public string Nome { get; set; } = "";
+        public string Estado { get; set; } = "";
         public string Ga4PropertyId { get; set; } = "";
         public string CaminhoTemplateSlide { get; set; } = "";
         public string PastaDestino { get; set; } = "";
@@ -196,7 +197,7 @@ namespace AutomacaoAnalyticsRift
             if (!Directory.Exists(cliente.PastaDestino))
                 Directory.CreateDirectory(cliente.PastaDestino);
 
-            string nomeArquivo = $"Relatorio_{cliente.Nome.Replace(" ", "_")}_{dados.Periodo.NomeMes}-{dados.Periodo.Ano}.pptx";
+            string nomeArquivo = $"Relatorio Mensal de acessos ao site - {dados.Periodo.NomeMes} de {dados.Periodo.Ano} - {cliente.Nome.Replace(" ", "_")} - {cliente.Estado.Replace(" ", "_")}.pptx";
             string caminhoFinal = Path.Combine(cliente.PastaDestino, nomeArquivo);
 
             Console.WriteLine($"\nIniciando geração para {cliente.Nome}...");
