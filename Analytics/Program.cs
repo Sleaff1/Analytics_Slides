@@ -25,7 +25,6 @@ namespace AutomacaoAnalyticsRift
         public string Estado { get; set; } = "";
         public string Ga4PropertyId { get; set; } = "";
         public string CaminhoTemplateSlide { get; set; } = "";
-        public string PastaDestino { get; set; } = "";
     }
 
     public class PeriodoRelatorio
@@ -192,13 +191,13 @@ namespace AutomacaoAnalyticsRift
     // ==========================================
     public class SlideService
     {
-        public void Gerar(Cliente cliente, DadosAnalytics dados)
+        public void Gerar(Cliente cliente, DadosAnalytics dados, string pastaDestino)
         {
-            if (!Directory.Exists(cliente.PastaDestino))
-                Directory.CreateDirectory(cliente.PastaDestino);
+            if (!Directory.Exists(pastaDestino))
+                Directory.CreateDirectory(pastaDestino);
 
             string nomeArquivo = $"Relatorio Mensal de acessos ao site - {dados.Periodo.NomeMes} de {dados.Periodo.Ano} - {cliente.Nome.Replace(" ", "_")} - {cliente.Estado.Replace(" ", "_")}.pptx";
-            string caminhoFinal = Path.Combine(cliente.PastaDestino, nomeArquivo);
+            string caminhoFinal = Path.Combine(pastaDestino, nomeArquivo);
 
             Console.WriteLine($"\nIniciando geração para {cliente.Nome}...");
 
@@ -433,6 +432,7 @@ namespace AutomacaoAnalyticsRift
             // Ajuste aqui com o caminho do seu Linux/Windows
             string caminhoCredencial = @"C:\Users\samu0\Documents\Analytics\analytics-automacao-1c71b3e01156.json";
             string caminhoClientesJson = @"C:\Users\samu0\Documents\Analytics\ClientesdaRIFT.json";
+            string pastaDestino = @"C:\Users\samu0\Documents\Analytics\islaide gerado";
 
             if (!File.Exists(caminhoClientesJson))
             {
@@ -460,7 +460,7 @@ namespace AutomacaoAnalyticsRift
                 {
                     Console.WriteLine($"\nProcessando: {cliente.Nome}");
                     var dados = analyticsService.ObterDados(cliente.Ga4PropertyId);
-                    slideService.Gerar(cliente, dados);
+                    slideService.Gerar(cliente, dados, pastaDestino);
                 }
                 catch (Exception ex)
                 {
