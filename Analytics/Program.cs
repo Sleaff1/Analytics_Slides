@@ -7,7 +7,6 @@ using System.Text.Json;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 
-// APELIDOS PARA ENXUGAR O CÓDIGO
 using A = DocumentFormat.OpenXml.Drawing;
 using C = DocumentFormat.OpenXml.Drawing.Charts;
 using P = DocumentFormat.OpenXml.Presentation;
@@ -16,9 +15,6 @@ using GA = Google.Analytics.Data.V1Beta;
 
 namespace AutomacaoAnalyticsRift
 {
-    // ==========================================
-    // 1. MODELOS DE DADOS
-    // ==========================================
     public class Cliente
     {
         public string Nome { get; set; } = "";
@@ -38,7 +34,6 @@ namespace AutomacaoAnalyticsRift
 
         public PeriodoRelatorio()
         {
-            // Pega sempre o mês ANTERIOR ao mês atual
             DateTime dataAtual = DateTime.Now;
             DateTime primeiroDiaMesAtual = new DateTime(dataAtual.Year, dataAtual.Month, 1);
             DataFim = primeiroDiaMesAtual.AddDays(-1);
@@ -48,7 +43,6 @@ namespace AutomacaoAnalyticsRift
             Ano = DataInicio.Year.ToString();
             DiasFormatados = $"{DataInicio:dd} a {DataFim:dd}";
             
-            // Otimização: Instancia a cultura do Brasil uma única vez
             var culturaBR = CultureInfo.GetCultureInfo("pt-BR");
             NomeMes = DataInicio.ToString("MMMM", culturaBR).ToUpper();
         }
@@ -59,11 +53,12 @@ namespace AutomacaoAnalyticsRift
         public PeriodoRelatorio Periodo { get; } = new PeriodoRelatorio();
         
         public string TotalSessoes { get; set; } = "0";
-        public string TotalUsuarios { get; set; } = "0";
+        public string TotalUsuarios { get; set; } = "0";     
+        public string TotalUsuariosAtivos { get; set; } = "0"; 
         public string TotalPageViews { get; set; } = "0";
 
-        public double SessoesDesktop { get; set; } = 0;
-        public double SessoesMobile { get; set; } = 0;
+        public double UsuariosDesktop { get; set; } = 0;
+        public double UsuariosMobile { get; set; } = 0;
         public string PctDesktop { get; set; } = "0%";
         public string PctMobile { get; set; } = "0%";
         
@@ -72,10 +67,7 @@ namespace AutomacaoAnalyticsRift
         public List<string> ListaCidades { get; } = new List<string>();
         public List<string> ListaPaginas { get; } = new List<string>();
     }
-
-    // ==========================================
-    // 2. SERVIÇO DE DADOS (GOOGLE ANALYTICS)
-    // ==========================================
+    
     public class AnalyticsService
     {
         private readonly GA.BetaAnalyticsDataClient _client;
@@ -95,19 +87,20 @@ namespace AutomacaoAnalyticsRift
 
             Console.WriteLine($"Buscando dados de {dtInicio} a {dtFim}...");
 
-            // 1. Visão Geral
-            var resGeral = ExecutarConsulta(prop, dtInicio, dtFim, null, "sessions", "activeUsers", "screenPageViews");
+        
+            var resGeral = ExecutarConsulta(prop, dtInicio, dtFim, null, "sessions", "totalUsers", "activeUsers", "screenPageViews");
             if (resGeral.Rows.Count > 0)
             {
-                dados.TotalSessoes = resGeral.Rows[0].MetricValues[0].Value;
-                dados.TotalUsuarios = resGeral.Rows[0].MetricValues[1].Value;
-                dados.TotalPageViews = resGeral.Rows[0].MetricValues[2].Value;
+                dados.TotalSessoes        = resGeral.Rows[0].MetricValues[0].Value; 
+                dados.TotalUsuarios       = resGeral.Rows[0].MetricValues[1].Value; 
+                dados.TotalUsuariosAtivos = resGeral.Rows[0].MetricValues[2].Value; 
+                dados.TotalPageViews      = resGeral.Rows[0].MetricValues[3].Value;
             }
             double.TryParse(dados.TotalSessoes, out double totalSessoesNum);
+            double.TryParse(dados.TotalUsuariosAtivos, out double totalUsuariosNum); 
             double.TryParse(dados.TotalPageViews, out double totalViewsNum);
-
-            // 2. Dispositivos (Desktop vs Mobile)
-            var resDisp = ExecutarConsulta(prop, dtInicio, dtFim, "deviceCategory", "sessions");
+            
+            var resDisp = ExecutarConsulta(prop, dtInicio, dtFim, "deviceCategory", "activeUsers");
             foreach (var row in resDisp.Rows)
             {
                 if (row.DimensionValues.Count == 0 || row.MetricValues.Count == 0) continue;
@@ -115,21 +108,20 @@ namespace AutomacaoAnalyticsRift
                 string disp = row.DimensionValues[0].Value.ToLower();
                 double.TryParse(row.MetricValues[0].Value, out double val);
                 
-                if (disp == "desktop") dados.SessoesDesktop += val;
-                else dados.SessoesMobile += val; // Agrupa mobile, tablet e smart tv
+                if (disp == "desktop") dados.UsuariosDesktop += val;
+                else dados.UsuariosMobile += val;
             }
 
-            double totalDisp = dados.SessoesDesktop + dados.SessoesMobile;
+            double totalDisp = dados.UsuariosDesktop + dados.UsuariosMobile;
             if (totalDisp > 0)
             {
-                dados.PctDesktop = $"{(dados.SessoesDesktop / totalDisp) * 100:F2}%";
-                dados.PctMobile = $"{(dados.SessoesMobile / totalDisp) * 100:F2}%";
+                dados.PctDesktop = $"{(dados.UsuariosDesktop / totalDisp) * 100:F2}%";
+                dados.PctMobile = $"{(dados.UsuariosMobile / totalDisp) * 100:F2}%";
             }
-
-            // 3. Listas (Navegadores, Resoluções, Cidades, Páginas)
-            PreencherLista(dados.ListaNavegadores, prop, dtInicio, dtFim, "browser", "sessions", 7, totalSessoesNum);
-            PreencherLista(dados.ListaResolucoes, prop, dtInicio, dtFim, "screenResolution", "sessions", 10, totalSessoesNum);
-            PreencherLista(dados.ListaCidades, prop, dtInicio, dtFim, "city", "sessions", 10, totalSessoesNum);
+            
+            PreencherLista(dados.ListaNavegadores, prop, dtInicio, dtFim, "browser", "activeUsers", 7, totalUsuariosNum);
+            PreencherLista(dados.ListaResolucoes, prop, dtInicio, dtFim, "screenResolution", "activeUsers", 10, totalUsuariosNum);
+            PreencherLista(dados.ListaCidades, prop, dtInicio, dtFim, "city", "activeUsers", 10, totalUsuariosNum);
             PreencherLista(dados.ListaPaginas, prop, dtInicio, dtFim, "pageTitle", "screenPageViews", 10, totalViewsNum);
 
             return dados;
@@ -141,7 +133,7 @@ namespace AutomacaoAnalyticsRift
             {
                 Property = property,
                 DateRanges = { new GA.DateRange { StartDate = start, EndDate = end } },
-                Limit = 10000 // Limite de segurança
+                Limit = 10000 
             };
             
             if (!string.IsNullOrEmpty(dimension))
@@ -149,8 +141,7 @@ namespace AutomacaoAnalyticsRift
 
             foreach (var m in metrics)
                 req.Metrics.Add(new GA.Metric { Name = m });
-
-            // Se tem dimensão, ordena pelo primeiro valor de métrica (Maior para menor)
+            
             if (!string.IsNullOrEmpty(dimension))
             {
                 req.OrderBys.Add(new GA.OrderBy
@@ -167,7 +158,6 @@ namespace AutomacaoAnalyticsRift
         {
             var res = ExecutarConsulta(property, start, end, dimension, metric);
             
-            // Otimização: Pega os primeiros 'limit' resultados direto da lista usando LINQ Take()
             int pos = 1;
             foreach (var row in res.Rows.Take(limit))
             {
@@ -179,16 +169,12 @@ namespace AutomacaoAnalyticsRift
                 
                 double pct = totalReferencia > 0 ? (valorNum / totalReferencia) * 100 : 0;
                 
-                // Otimização: Interpolação de string ao invés de string.Format
                 lista.Add($"{pos} {nome} - {valorStr} ({pct:F2}%)");
                 pos++;
             }
         }
     }
-
-    // ==========================================
-    // 3. SERVIÇO DE GERAÇÃO DE SLIDES
-    // ==========================================
+    
     public class SlideService
     {
         public void Gerar(Cliente cliente, DadosAnalytics dados, string pastaDestino)
@@ -200,10 +186,7 @@ namespace AutomacaoAnalyticsRift
             string caminhoFinal = Path.Combine(pastaDestino, nomeArquivo);
 
             Console.WriteLine($"\nIniciando geração para {cliente.Nome}...");
-
-            // =========================================================
-            // PASSO 1: ATUALIZAR GRÁFICOS DIRETAMENTE NO TEMPLATE (MODELO VIVO)
-            // =========================================================
+            
             Console.WriteLine("Atualizando histórico de gráficos no modelo base...");
             using (PresentationDocument pptTemplate = PresentationDocument.Open(cliente.CaminhoTemplateSlide, true))
             {
@@ -212,21 +195,17 @@ namespace AutomacaoAnalyticsRift
 
                 double.TryParse(dados.TotalSessoes, out double totalSessoes);
                 double.TryParse(dados.TotalPageViews, out double totalViews);
-
-                // Injeta os dados nos gráficos do TEMPLATE (acumula histórico)
+                
                 if (slideIdsTemplate.Count > 1)
                     AtualizarGrafico(pPartTemplate, slideIdsTemplate[1], dados.Periodo.NumeroMes, new[] { totalSessoes });
                 
                 if (slideIdsTemplate.Count > 2)
-                    AtualizarGrafico(pPartTemplate, slideIdsTemplate[2], dados.Periodo.NumeroMes, new[] { dados.SessoesDesktop, dados.SessoesMobile });
+                    AtualizarGrafico(pPartTemplate, slideIdsTemplate[2], dados.Periodo.NumeroMes, new[] { dados.UsuariosDesktop, dados.UsuariosMobile });
                 
                 if (slideIdsTemplate.Count > 6)
                     AtualizarGrafico(pPartTemplate, slideIdsTemplate[6], dados.Periodo.NumeroMes, new[] { totalViews });
             }
-
-            // =========================================================
-            // PASSO 2: CRIAR A CÓPIA FINAL (AGORA COM GRÁFICOS ATUALIZADOS)
-            // =========================================================
+            
             if (File.Exists(caminhoFinal))
             {
                 try
@@ -242,17 +221,13 @@ namespace AutomacaoAnalyticsRift
                 }
             }
             File.Copy(cliente.CaminhoTemplateSlide, caminhoFinal, true);
-
-            // =========================================================
-            // PASSO 3: SUBSTITUIR TEXTOS E LISTAS APENAS NO ARQUIVO FINAL
-            // =========================================================
+            
             Console.WriteLine("Injetando textos e listas no relatório final...");
             using (PresentationDocument pptFinal = PresentationDocument.Open(caminhoFinal, true))
             {
                 var pPartFinal = pptFinal.PresentationPart!;
                 var slideIdsFinal = pPartFinal.Presentation.SlideIdList!.Elements<P.SlideId>().ToList();
-
-                // Atualiza textos apenas na CÓPIA, preservando as tags no template
+                
                 foreach (var slideId in slideIdsFinal)
                 {
                     SlidePart slidePart = (SlidePart)pPartFinal.GetPartById(slideId.RelationshipId!.Value!);
@@ -275,9 +250,9 @@ namespace AutomacaoAnalyticsRift
                 { "#USUARIOS#", dados.TotalUsuarios },
                 { "#MOB_PCT#", dados.PctMobile },
                 { "#DESK_PCT#", dados.PctDesktop },
-                { "#TOTAL_NAVEG#", dados.TotalSessoes },
-                { "#TOTAL_RESOL#", dados.TotalSessoes },
-                { "#TOTAL_CIDADES#", dados.TotalSessoes },
+                { "#TOTAL_NAVEG#", dados.TotalUsuariosAtivos },
+                { "#TOTAL_RESOL#", dados.TotalUsuariosAtivos },
+                { "#TOTAL_CIDADES#", dados.TotalUsuariosAtivos },
                 { "#TOTAL_PAGINAS#", dados.TotalPageViews }
             };
 
@@ -339,8 +314,7 @@ namespace AutomacaoAnalyticsRift
             SlidePart slidePart = (SlidePart)pPart.GetPartById(slideId.RelationshipId!.Value!);
             ChartPart? chartPart = slidePart.ChartParts.FirstOrDefault();
             if (chartPart == null) return;
-
-            // 1. Atualizar a Planilha Excel Embutida no PowerPoint
+            
             var excelPart = chartPart.EmbeddedPackagePart;
             if (excelPart != null)
             {
@@ -383,8 +357,7 @@ namespace AutomacaoAnalyticsRift
                     }
                 }
             }
-
-            // 2. Atualizar o Cache XML do Gráfico Visual
+            
             var chartSpace = chartPart.ChartSpace;
             var seriesList = chartSpace.Descendants<C.SeriesText>().Select(s => s.Parent).ToList();
             uint ptIndex = (uint)(mesAtual - 1); 
@@ -421,15 +394,11 @@ namespace AutomacaoAnalyticsRift
             chartPart.ChartSpace.Save();
         }
     }
-
-    // ==========================================
-    // 4. INICIALIZAÇÃO
-    // ==========================================
+    
     class Program
     {
         static void Main()
         {
-            // Ajuste aqui com o caminho do seu Linux/Windows
             string caminhoCredencial = @"C:\Users\samu0\Documents\Analytics\analytics-automacao-1c71b3e01156.json";
             string caminhoClientesJson = @"C:\Users\samu0\Documents\Analytics\ClientesdaRIFT.json";
             string pastaDestino = @"C:\Users\samu0\Documents\Analytics\islaide gerado";
