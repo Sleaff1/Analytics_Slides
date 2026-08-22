@@ -1,13 +1,13 @@
 
 # Slides Google Analytics
 
-Criador de slides em `C#` obtendo informações da `API do Google analytics` e inserido em modelos pré feitos pelo usuário.
+Criador de slides em `C#` obtendo informações da `API do Google analytics` e inserido em um modelo pré feito pelo usuário.
 
-O sistema manipula os arquivos via OpenXML, dispensando a instalação do Pacote Office e introduzindo o conceito de "Living Templates", onde o histórico dos gráficos é acumulado de forma automática mês a mês no arquivo base.
+O sistema manipula os arquivos via OpenXML, dispensando a instalação do Pacote Office e introduzindo o conceito de "Templates vivos", onde o histórico de gráficos é acumulado de forma automática mês a mês no JSON do cliente
 
 Ou seja, ideal para gerar um relatório mensal do site da sua empresa ou para fins pessoais.
 ## Features
-**Modelos de slides**: O sistema atualiza diretamente a planilha base *(Excel embutido)* dos gráficos no arquivo original. Os gráficos acumulam dados sequencialmente sem perder o formato.
+**Modelos de slide**: O sistema atualiza diretamente a planilha base *(Excel embutido)* dos gráficos no arquivo original. Os gráficos tem seus dados armazenados e inseridos de acordo com o seu mês e ano no slide.
 
 **Zero Dependências**: Manipula a árvore XML dos slides. Não requer licenças ou processos do Microsoft Office rodando em segundo plano.
 
@@ -48,8 +48,22 @@ dotnet build -c Release
 
 - Adicione o e-mail da Conta de Serviço recém-criada como Leitor diretamente na aba de administração das propriedades do GA4 desejadas.
 
-## Clientes.json
-Crie o arquivo de configuração para rotear as entradas e saídas do sistema.
+## Caminhos
+
+Alguns caminhos dentro do código devem ser alterados para que tudo funcione da maneira correta, todas elas ficam presentes na classe `Main`
+
+* `string caminhoCredencial   = @"sua_pasta";`: Credencial gerada no **Google cloud console**
+
+* `string caminhoClientesJson = @"sua_pasta";`: JSON dos clientes que será explicado no próximo tópico
+
+* `string caminhoTemplate     = @"sua_pasta";`: Template do slide que será utilizado na geração
+
+* `string pastaDestino        = @"sua_pasta";`: Local onde os slides sejam colocados após geração
+
+
+
+## Clientes
+Crie o arquivo de configuração JSON para rotear as entradas e saídas do sistema.
 
 Ao definir os caminhos em ambientes Windows, lembre-se de escapar as barras no JSON (C:\\Users\\...). Em ambientes Unix/Linux, utilize o padrão convencional sem escapes.
 
@@ -60,7 +74,28 @@ Ao definir os caminhos em ambientes Windows, lembre-se de escapar as barras no J
     "Nome": "Empresa Alpha",
     "Estado": "SP",
     "Ga4PropertyId": "123456789",
-    "CaminhoTemplateSlide": "/home/samuel/Templates/Template_Alpha.pptx",
-    "PastaDestino": "/home/samuel/Relatorios_Mensais"
+    "CaminhoClientePasta": "/home/samuel/Clientes/Empresa Alpha",
+  }
+```
+Cada cliente deve possuir uma pasta onde vai ser inserida a sua logo e o seu JSON com as informações dos gráficos mês a mês, para cada ano. Exemplo:
+
+```JSON
+  {
+  "Ano": "2026",
+  "Meses": {
+    "5": {
+      "NomeMes": "MAIO",
+      "Sessoes": 200,
+      "Desktop": 400,
+      "Mobile": 120,
+      "PageViews": 3500
+    },
+    "6": {
+      "NomeMes": "JUNHO",
+      "Sessoes": 2500,
+      "Desktop": 750,
+      "Mobile": 900,
+      "PageViews": 4500
+    }
   }
 ```
