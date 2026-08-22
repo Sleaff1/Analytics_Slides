@@ -26,7 +26,7 @@ Ou seja, ideal para gerar um relatório mensal do site da sua empresa ou para fi
 ## Instalação
 
 1. **Clone o repositório:**
-```http
+```Bash
 git clone https://github.com/Sleaff1/Analytics_Slides
 cd ga4-to-pptx
 ```
