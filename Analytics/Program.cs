@@ -16,48 +16,34 @@ using GA = Google.Analytics.Data.V1Beta;
 
 namespace AutomacaoAnalyticsRift
 {
-    // ══════════════════════════════════════════════════════════════════════════
-    //  Modelos de Dados
-    // ══════════════════════════════════════════════════════════════════════════
-
     public class Cliente
     {
         public string Nome { get; set; } = "";
         public string Estado { get; set; } = "";
         public string Ga4PropertyId { get; set; } = "";
-
-        /// <summary>
-        /// Caminho da pasta do cliente, que contém a logo (logo.png) e o JSON de
-        /// histórico anual (historico_YYYY.json).
-        /// Ex.: C:\...\Analytics\clientes\CartorioFulano
-        /// </summary>
+        
         public string CaminhoClientePasta { get; set; } = "";
-
-        /// <summary>Caminho para o arquivo logo.png do cliente (derivado da pasta).</summary>
+        
         [JsonIgnore]
         public string CaminhoLogo => Path.Combine(CaminhoClientePasta, "logo.png");
-
-        /// <summary>Caminho para o JSON de histórico do ano informado (ex.: historico_2026.json).</summary>
+        
         public string CaminhoHistoricoJson(string ano) =>
             Path.Combine(CaminhoClientePasta, $"historico_{ano}.json");
     }
-
-    /// <summary>Dados de um único mês armazenados no JSON de histórico anual.</summary>
+    
     public class DadosMes
     {
-        public string NomeMes  { get; set; } = "";   // Ex.: "JULHO"
+        public string NomeMes  { get; set; } = "";   
         public double Sessoes  { get; set; }
         public double Desktop  { get; set; }
         public double Mobile   { get; set; }
         public double PageViews { get; set; }
     }
-
-    /// <summary>Estrutura completa do JSON de histórico anual por cliente.</summary>
+    
     public class HistoricoAnual
     {
         public string Ano { get; set; } = "";
-
-        /// <summary>Chave: número do mês ("1"–"12"). Valor: dados daquele mês.</summary>
+        
         public Dictionary<string, DadosMes> Meses { get; set; } = new();
     }
 
@@ -105,124 +91,114 @@ namespace AutomacaoAnalyticsRift
         public List<string> ListaCidades     { get; } = new List<string>();
         public List<string> ListaPaginas     { get; } = new List<string>();
     }
-
-    // ══════════════════════════════════════════════════════════════════════════
-    //  Serviço Google Analytics
-    // ══════════════════════════════════════════════════════════════════════════
-
     public class AnalyticsService
     {
-        private readonly GA.BetaAnalyticsDataClient _client;
+        private readonly GA.BetaAnalyticsDataClient _clienteGA4;
 
         public AnalyticsService(string caminhoCredencialJson)
         {
             Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", caminhoCredencialJson);
-            _client = GA.BetaAnalyticsDataClient.Create();
+            _clienteGA4 = GA.BetaAnalyticsDataClient.Create();
         }
 
         public DadosAnalytics ObterDados(string propertyId)
         {
             var dados = new DadosAnalytics();
-            string dtInicio = dados.Periodo.DataInicio.ToString("yyyy-MM-dd");
-            string dtFim    = dados.Periodo.DataFim.ToString("yyyy-MM-dd");
-            string prop     = $"properties/{propertyId}";
+            string dataInicio     = dados.Periodo.DataInicio.ToString("yyyy-MM-dd");
+            string dataFim        = dados.Periodo.DataFim.ToString("yyyy-MM-dd");
+            string propriedadeGA4 = $"properties/{propertyId}";
 
-            Console.WriteLine($"Buscando dados de {dtInicio} a {dtFim}...");
+            Console.WriteLine($"Buscando dados de {dataInicio} a {dataFim}...");
 
-            var resGeral = ExecutarConsulta(prop, dtInicio, dtFim, null, "sessions", "totalUsers", "activeUsers", "screenPageViews");
-            if (resGeral.Rows.Count > 0)
+            var respostaGeral = ExecutarConsulta(propriedadeGA4, dataInicio, dataFim, null, "sessions", "totalUsers", "activeUsers", "screenPageViews");
+            if (respostaGeral.Rows.Count > 0)
             {
-                dados.TotalSessoes        = resGeral.Rows[0].MetricValues[0].Value;
-                dados.TotalUsuarios       = resGeral.Rows[0].MetricValues[1].Value;
-                dados.TotalUsuariosAtivos = resGeral.Rows[0].MetricValues[2].Value;
-                dados.TotalPageViews      = resGeral.Rows[0].MetricValues[3].Value;
+                dados.TotalSessoes        = respostaGeral.Rows[0].MetricValues[0].Value;
+                dados.TotalUsuarios       = respostaGeral.Rows[0].MetricValues[1].Value;
+                dados.TotalUsuariosAtivos = respostaGeral.Rows[0].MetricValues[2].Value;
+                dados.TotalPageViews      = respostaGeral.Rows[0].MetricValues[3].Value;
             }
 
-            double.TryParse(dados.TotalSessoes,        out double totalSessoesNum);
-            double.TryParse(dados.TotalUsuariosAtivos,  out double totalUsuariosNum);
-            double.TryParse(dados.TotalPageViews,       out double totalViewsNum);
+            double.TryParse(dados.TotalSessoes,        out double totalSessoesNumero);
+            double.TryParse(dados.TotalUsuariosAtivos,  out double totalUsuariosNumero);
+            double.TryParse(dados.TotalPageViews,       out double totalVisualizacoesNumero);
 
-            var resDisp = ExecutarConsulta(prop, dtInicio, dtFim, "deviceCategory", "activeUsers");
-            foreach (var row in resDisp.Rows)
+            var respostaDispositivos = ExecutarConsulta(propriedadeGA4, dataInicio, dataFim, "deviceCategory", "activeUsers");
+            foreach (var linha in respostaDispositivos.Rows)
             {
-                if (row.DimensionValues.Count == 0 || row.MetricValues.Count == 0) continue;
+                if (linha.DimensionValues.Count == 0 || linha.MetricValues.Count == 0) continue;
 
-                string disp = row.DimensionValues[0].Value.ToLower();
-                double.TryParse(row.MetricValues[0].Value, out double val);
+                string tipoDispositivo = linha.DimensionValues[0].Value.ToLower();
+                double.TryParse(linha.MetricValues[0].Value, out double quantidadeUsuarios);
 
-                if (disp == "desktop") dados.UsuariosDesktop += val;
-                else                   dados.UsuariosMobile  += val;
+                if (tipoDispositivo == "desktop") dados.UsuariosDesktop += quantidadeUsuarios;
+                else                              dados.UsuariosMobile  += quantidadeUsuarios;
             }
 
-            double totalDisp = dados.UsuariosDesktop + dados.UsuariosMobile;
-            if (totalDisp > 0)
+            double totalDispositivos = dados.UsuariosDesktop + dados.UsuariosMobile;
+            if (totalDispositivos > 0)
             {
-                dados.PctDesktop = $"{(dados.UsuariosDesktop / totalDisp) * 100:F2}%";
-                dados.PctMobile  = $"{(dados.UsuariosMobile  / totalDisp) * 100:F2}%";
+                dados.PctDesktop = $"{(dados.UsuariosDesktop / totalDispositivos) * 100:F2}%";
+                dados.PctMobile  = $"{(dados.UsuariosMobile  / totalDispositivos) * 100:F2}%";
             }
 
-            PreencherLista(dados.ListaNavegadores, prop, dtInicio, dtFim, "browser",           "activeUsers",    7,  totalUsuariosNum);
-            PreencherLista(dados.ListaResolucoes,  prop, dtInicio, dtFim, "screenResolution",  "activeUsers",    10, totalUsuariosNum);
-            PreencherLista(dados.ListaCidades,     prop, dtInicio, dtFim, "city",              "activeUsers",    10, totalUsuariosNum);
-            PreencherLista(dados.ListaPaginas,     prop, dtInicio, dtFim, "pageTitle",         "screenPageViews",10, totalViewsNum);
+            PreencherLista(dados.ListaNavegadores, propriedadeGA4, dataInicio, dataFim, "browser",           "activeUsers",    7,  totalUsuariosNumero);
+            PreencherLista(dados.ListaResolucoes,  propriedadeGA4, dataInicio, dataFim, "screenResolution",  "activeUsers",    10, totalUsuariosNumero);
+            PreencherLista(dados.ListaCidades,     propriedadeGA4, dataInicio, dataFim, "city",              "activeUsers",    10, totalUsuariosNumero);
+            PreencherLista(dados.ListaPaginas,     propriedadeGA4, dataInicio, dataFim, "pageTitle",         "screenPageViews",10, totalVisualizacoesNumero);
 
             return dados;
         }
 
-        private GA.RunReportResponse ExecutarConsulta(string property, string start, string end,
-                                                      string? dimension, params string[] metrics)
+        private GA.RunReportResponse ExecutarConsulta(string propriedade, string dataInicio, string dataFim,
+                                                      string? dimensao, params string[] metricas)
         {
-            var req = new GA.RunReportRequest
+            var requisicao = new GA.RunReportRequest
             {
-                Property   = property,
-                DateRanges = { new GA.DateRange { StartDate = start, EndDate = end } },
+                Property   = propriedade,
+                DateRanges = { new GA.DateRange { StartDate = dataInicio, EndDate = dataFim } },
                 Limit      = 10000
             };
 
-            if (!string.IsNullOrEmpty(dimension))
-                req.Dimensions.Add(new GA.Dimension { Name = dimension });
+            if (!string.IsNullOrEmpty(dimensao))
+                requisicao.Dimensions.Add(new GA.Dimension { Name = dimensao });
 
-            foreach (var m in metrics)
-                req.Metrics.Add(new GA.Metric { Name = m });
+            foreach (var metrica in metricas)
+                requisicao.Metrics.Add(new GA.Metric { Name = metrica });
 
-            if (!string.IsNullOrEmpty(dimension))
+            if (!string.IsNullOrEmpty(dimensao))
             {
-                req.OrderBys.Add(new GA.OrderBy
+                requisicao.OrderBys.Add(new GA.OrderBy
                 {
-                    Metric = new GA.OrderBy.Types.MetricOrderBy { MetricName = metrics[0] },
+                    Metric = new GA.OrderBy.Types.MetricOrderBy { MetricName = metricas[0] },
                     Desc   = true
                 });
             }
 
-            return _client.RunReport(req);
+            return _clienteGA4.RunReport(requisicao);
         }
 
-        private void PreencherLista(List<string> lista, string property, string start, string end,
-                                    string dimension, string metric, int limit, double totalReferencia)
+        private void PreencherLista(List<string> lista, string propriedade, string dataInicio, string dataFim,
+                                    string dimensao, string metrica, int limite, double totalReferencia)
         {
-            var res = ExecutarConsulta(property, start, end, dimension, metric);
+            var resultado = ExecutarConsulta(propriedade, dataInicio, dataFim, dimensao, metrica);
 
-            int pos = 1;
-            foreach (var row in res.Rows.Take(limit))
+            int posicao = 1;
+            foreach (var linha in resultado.Rows.Take(limite))
             {
-                if (row.DimensionValues.Count == 0 || row.MetricValues.Count == 0) continue;
+                if (linha.DimensionValues.Count == 0 || linha.MetricValues.Count == 0) continue;
 
-                string nome     = row.DimensionValues[0].Value;
-                string valorStr = row.MetricValues[0].Value;
-                double.TryParse(valorStr, out double valorNum);
+                string nomeItem   = linha.DimensionValues[0].Value;
+                string valorTexto = linha.MetricValues[0].Value;
+                double.TryParse(valorTexto, out double valorNumerico);
 
-                double pct = totalReferencia > 0 ? (valorNum / totalReferencia) * 100 : 0;
+                double percentual = totalReferencia > 0 ? (valorNumerico / totalReferencia) * 100 : 0;
 
-                lista.Add($"{pos} {nome} - {valorStr} ({pct:F2}%)");
-                pos++;
+                lista.Add($"{posicao} {nomeItem} - {valorTexto} ({percentual:F2}%)");
+                posicao++;
             }
         }
     }
-
-    // ══════════════════════════════════════════════════════════════════════════
-    //  Serviço de Histórico Anual (JSON por cliente)
-    // ══════════════════════════════════════════════════════════════════════════
-
     public class HistoricoService
     {
         private static readonly JsonSerializerOptions JsonOpts = new JsonSerializerOptions
@@ -230,34 +206,24 @@ namespace AutomacaoAnalyticsRift
             WriteIndented = true,
             Encoder       = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
         };
-
-        /// <summary>
-        /// Lê o JSON de histórico do caminho indicado. Se não existir ou estiver corrompido,
-        /// retorna um <see cref="HistoricoAnual"/> vazio para o ano informado.
-        /// </summary>
         public HistoricoAnual CarregarOuCriar(string caminhoJson, string ano)
         {
             if (File.Exists(caminhoJson))
             {
                 try
                 {
-                    var texto     = File.ReadAllText(caminhoJson);
-                    var historico = JsonSerializer.Deserialize<HistoricoAnual>(texto, JsonOpts);
-                    if (historico != null) return historico;
+                    var textoJson          = File.ReadAllText(caminhoJson);
+                    var historicoCarregado = JsonSerializer.Deserialize<HistoricoAnual>(textoJson, JsonOpts);
+                    if (historicoCarregado != null) return historicoCarregado;
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"[AVISO] Erro ao ler histórico JSON: {ex.Message}. Criando novo.");
+                    Console.WriteLine($"[AVISO] Erro ao ler historico JSON: {ex.Message}. Criando novo.");
                 }
             }
 
             return new HistoricoAnual { Ano = ano, Meses = new Dictionary<string, DadosMes>() };
         }
-
-        /// <summary>
-        /// Insere ou atualiza no objeto <paramref name="historico"/> os dados do mês atual e
-        /// persiste o JSON no disco.
-        /// </summary>
         public void SalvarMesAtual(HistoricoAnual historico, DadosAnalytics dados, string caminhoJson)
         {
             string chave = dados.Periodo.NumeroMes.ToString();
@@ -274,42 +240,28 @@ namespace AutomacaoAnalyticsRift
                 PageViews = pageViews
             };
 
-            string? pasta = Path.GetDirectoryName(caminhoJson);
-            if (!string.IsNullOrEmpty(pasta) && !Directory.Exists(pasta))
-                Directory.CreateDirectory(pasta);
+            string? pastaDoArquivo = Path.GetDirectoryName(caminhoJson);
+            if (!string.IsNullOrEmpty(pastaDoArquivo) && !Directory.Exists(pastaDoArquivo))
+                Directory.CreateDirectory(pastaDoArquivo);
 
             File.WriteAllText(caminhoJson, JsonSerializer.Serialize(historico, JsonOpts));
-            Console.WriteLine($"Histórico atualizado: {caminhoJson}");
+            Console.WriteLine($"Historico atualizado: {caminhoJson}");
         }
     }
-
-    // ══════════════════════════════════════════════════════════════════════════
-    //  Serviço de Geração de Slides
-    // ══════════════════════════════════════════════════════════════════════════
-
     public class SlideService
     {
         private readonly HistoricoService _historicoService = new HistoricoService();
-
-        /// <summary>
-        /// Fluxo completo de geração de um slide para um cliente:
-        /// 1. Garante pasta do cliente | 2. Atualiza histórico JSON | 3. Copia template |
-        /// 4. Popula gráficos com histórico completo + escala dinâmica |
-        /// 5. Injeta textos/listas | 6. Substitui logo.
-        /// O template original NUNCA é modificado.
-        /// </summary>
+        
+        
         public void Gerar(Cliente cliente, DadosAnalytics dados, string caminhoTemplate, string pastaDestino)
         {
-            // ── 1. Garantir pasta do cliente ──────────────────────────────────
             if (!Directory.Exists(cliente.CaminhoClientePasta))
                 Directory.CreateDirectory(cliente.CaminhoClientePasta);
-
-            // ── 2. Carregar histórico, atualizar mês atual e salvar ───────────
+            
             string caminhoHistorico = cliente.CaminhoHistoricoJson(dados.Periodo.Ano);
-            var historico = _historicoService.CarregarOuCriar(caminhoHistorico, dados.Periodo.Ano);
-            _historicoService.SalvarMesAtual(historico, dados, caminhoHistorico);
-
-            // ── 3. Montar caminho do arquivo de saída ─────────────────────────
+            var historicoCliente    = _historicoService.CarregarOuCriar(caminhoHistorico, dados.Periodo.Ano);
+            _historicoService.SalvarMesAtual(historicoCliente, dados, caminhoHistorico);
+            
             if (!Directory.Exists(pastaDestino))
                 Directory.CreateDirectory(pastaDestino);
 
@@ -317,9 +269,8 @@ namespace AutomacaoAnalyticsRift
                                  $" - {cliente.Nome.Replace(" ", "_")} - {cliente.Estado.Replace(" ", "_")}.pptx";
             string caminhoFinal = Path.Combine(pastaDestino, nomeArquivo);
 
-            Console.WriteLine($"\nIniciando geração para {cliente.Nome}...");
-
-            // ── 4. Verificar se o arquivo de saída está em uso ────────────────
+            Console.WriteLine($"\nIniciando geracao para {cliente.Nome}...");
+            
             if (File.Exists(caminhoFinal))
             {
                 try
@@ -329,79 +280,69 @@ namespace AutomacaoAnalyticsRift
                 }
                 catch (IOException)
                 {
-                    Console.WriteLine($"[AVISO] O arquivo {nomeArquivo} está ABERTO no PowerPoint!");
+                    Console.WriteLine($"[AVISO] O arquivo {nomeArquivo} esta ABERTO no PowerPoint!");
                     Console.WriteLine("Feche-o para atualizar. Pulando cliente...");
                     return;
                 }
             }
-
-            // ── 5. Copiar template → destino (template original intocado) ─────
+            
             File.Copy(caminhoTemplate, caminhoFinal, true);
-
-            // ── 6. Abrir CÓPIA e aplicar todas as modificações ────────────────
-            Console.WriteLine("Atualizando gráficos com histórico completo...");
-            using (PresentationDocument ppt = PresentationDocument.Open(caminhoFinal, true))
+            
+            Console.WriteLine("Atualizando graficos com historico completo...");
+            using (PresentationDocument apresentacao = PresentationDocument.Open(caminhoFinal, true))
             {
-                var pPart    = ppt.PresentationPart!;
-                var slideIds = pPart.Presentation.SlideIdList!.Elements<P.SlideId>().ToList();
-
-                // Slide índice 1 — Sessões (1 série)
-                if (slideIds.Count > 1)
+                var parteApresentacao = apresentacao.PresentationPart!;
+                var idsSlides         = parteApresentacao.Presentation.SlideIdList!.Elements<P.SlideId>().ToList();
+                
+                if (idsSlides.Count > 1)
                 {
-                    var valores = ExtrairValores(historico, m => new[] { m.Sessoes });
-                    AtualizarGrafico(pPart, slideIds[1], valores);
+                    var valoresMensais = ExtrairValores(historicoCliente, m => new[] { m.Sessoes });
+                    AtualizarGrafico(parteApresentacao, idsSlides[1], valoresMensais);
                 }
-
-                // Slide índice 2 — Dispositivos: Desktop + Mobile (2 séries)
-                if (slideIds.Count > 2)
+                
+                if (idsSlides.Count > 2)
                 {
-                    var valores = ExtrairValores(historico, m => new[] { m.Desktop, m.Mobile });
-                    AtualizarGrafico(pPart, slideIds[2], valores);
+                    var valoresMensais = ExtrairValores(historicoCliente, m => new[] { m.Desktop, m.Mobile });
+                    AtualizarGrafico(parteApresentacao, idsSlides[2], valoresMensais);
                 }
-
-                // Slide índice 6 — PageViews (1 série)
-                if (slideIds.Count > 6)
+                
+                if (idsSlides.Count > 6)
                 {
-                    var valores = ExtrairValores(historico, m => new[] { m.PageViews });
-                    AtualizarGrafico(pPart, slideIds[6], valores);
+                    var valoresMensais = ExtrairValores(historicoCliente, m => new[] { m.PageViews });
+                    AtualizarGrafico(parteApresentacao, idsSlides[6], valoresMensais);
                 }
 
                 Console.WriteLine("Injetando textos e listas...");
-                foreach (var slideId in slideIds)
+                foreach (var idSlide in idsSlides)
                 {
-                    var slidePart = (SlidePart)pPart.GetPartById(slideId.RelationshipId!.Value!);
-                    SubstituirTextos(slidePart, dados);
-                    SubstituirListas(slidePart, dados);
+                    var parteSlide = (SlidePart)parteApresentacao.GetPartById(idSlide.RelationshipId!.Value!);
+                    SubstituirTextos(parteSlide, dados);
+                    SubstituirListas(parteSlide, dados);
                 }
 
                 Console.WriteLine("Substituindo logo...");
-                foreach (var slideId in slideIds)
+                foreach (var idSlide in idsSlides)
                 {
-                    var slidePart = (SlidePart)pPart.GetPartById(slideId.RelationshipId!.Value!);
-                    SubstituirLogo(slidePart, cliente.CaminhoLogo);
+                    var parteSlide = (SlidePart)parteApresentacao.GetPartById(idSlide.RelationshipId!.Value!);
+                    SubstituirLogo(parteSlide, cliente.CaminhoLogo);
                 }
             }
 
-            Console.WriteLine($"Slide concluído e salvo em: {caminhoFinal}");
+            Console.WriteLine($"Slide concluido e salvo em: {caminhoFinal}");
         }
-
-        // ── Extrai lista ordenada de (Mes, Valores[]) a partir do histórico ───
+        
         private List<(int Mes, double[] Valores)> ExtrairValores(
             HistoricoAnual historico, Func<DadosMes, double[]> seletor)
         {
             return historico.Meses
-                .Select(kv => (Mes: int.Parse(kv.Key), Valores: seletor(kv.Value)))
-                .OrderBy(x => x.Mes)
+                .Select(entradaMes => (Mes: int.Parse(entradaMes.Key), Valores: seletor(entradaMes.Value)))
+                .OrderBy(item => item.Mes)
                 .ToList();
         }
 
-        // ─────────────────────────────────────────────────────────────────────
-        //  Substituição de Textos
-        // ─────────────────────────────────────────────────────────────────────
-
-        private void SubstituirTextos(SlidePart slidePart, DadosAnalytics dados)
+        private void SubstituirTextos(SlidePart parteSlide, DadosAnalytics dados)
         {
-            var dic = new Dictionary<string, string>
+            var dicionarioSubstituicoes = new Dictionary<string, string>
             {
                 { "#MES_NOME#",      dados.Periodo.NomeMes         },
                 { "#ANO#",           dados.Periodo.Ano              },
@@ -416,94 +357,83 @@ namespace AutomacaoAnalyticsRift
                 { "#TOTAL_PAGINAS#", dados.TotalPageViews           }
             };
 
-            foreach (var t in slidePart.Slide.Descendants<A.Text>().Where(x => !string.IsNullOrEmpty(x.Text)))
+            foreach (var textoElemento in parteSlide.Slide.Descendants<A.Text>().Where(x => !string.IsNullOrEmpty(x.Text)))
             {
-                foreach (var kvp in dic)
+                foreach (var substituicao in dicionarioSubstituicoes)
                 {
-                    if (t.Text.Contains(kvp.Key))
-                        t.Text = t.Text.Replace(kvp.Key, kvp.Value);
+                    if (textoElemento.Text.Contains(substituicao.Key))
+                        textoElemento.Text = textoElemento.Text.Replace(substituicao.Key, substituicao.Value);
                 }
             }
-            slidePart.Slide.Save();
+            parteSlide.Slide.Save();
         }
 
-        // ─────────────────────────────────────────────────────────────────────
-        //  Substituição de Listas
-        // ─────────────────────────────────────────────────────────────────────
-
-        private void SubstituirListas(SlidePart slidePart, DadosAnalytics dados)
+        private void SubstituirListas(SlidePart parteSlide, DadosAnalytics dados)
         {
-            ProcessarListaTag(slidePart, "#NAVEGADORES#", dados.ListaNavegadores);
-            ProcessarListaTag(slidePart, "#RESOLUCOES#",  dados.ListaResolucoes);
-            ProcessarListaTag(slidePart, "#CIDADES#",     dados.ListaCidades);
-            ProcessarListaTag(slidePart, "#PAGINAS#",     dados.ListaPaginas);
-            slidePart.Slide.Save();
+            ProcessarListaTag(parteSlide, "#NAVEGADORES#", dados.ListaNavegadores);
+            ProcessarListaTag(parteSlide, "#RESOLUCOES#",  dados.ListaResolucoes);
+            ProcessarListaTag(parteSlide, "#CIDADES#",     dados.ListaCidades);
+            ProcessarListaTag(parteSlide, "#PAGINAS#",     dados.ListaPaginas);
+            parteSlide.Slide.Save();
         }
 
-        private void ProcessarListaTag(SlidePart slidePart, string tag, List<string> linhas)
+        private void ProcessarListaTag(SlidePart parteSlide, string tag, List<string> linhas)
         {
-            var textoMarcador = slidePart.Slide.Descendants<A.Text>()
+            var textoMarcador = parteSlide.Slide.Descendants<A.Text>()
                 .FirstOrDefault(t => t.Text.Contains(tag));
             if (textoMarcador == null) return;
 
-            var runOriginal = textoMarcador.Parent as A.Run;
-            var paragrafo   = runOriginal?.Parent as A.Paragraph;
-            if (runOriginal == null || paragrafo == null) return;
+            var execucaoOriginal = textoMarcador.Parent as A.Run;
+            var paragrafo        = execucaoOriginal?.Parent as A.Paragraph;
+            if (execucaoOriginal == null || paragrafo == null) return;
 
             if (linhas.Count == 0)
             {
-                textoMarcador.Text = "Sem dados no período.";
+                textoMarcador.Text = "Sem dados no periodo.";
                 return;
             }
 
-            OpenXmlElement ultimoElemento = runOriginal;
+            OpenXmlElement ultimoElemento = execucaoOriginal;
             for (int i = 0; i < linhas.Count; i++)
             {
-                var novoRun = (A.Run)runOriginal.CloneNode(true);
-                novoRun.GetFirstChild<A.Text>()!.Text = linhas[i];
-                paragrafo.InsertAfter(novoRun, ultimoElemento);
-                ultimoElemento = novoRun;
+                var novaExecucao = (A.Run)execucaoOriginal.CloneNode(true);
+                novaExecucao.GetFirstChild<A.Text>()!.Text = linhas[i];
+                paragrafo.InsertAfter(novaExecucao, ultimoElemento);
+                ultimoElemento = novaExecucao;
 
                 if (i < linhas.Count - 1)
                 {
-                    var quebra = new A.Break();
-                    paragrafo.InsertAfter(quebra, ultimoElemento);
-                    ultimoElemento = quebra;
+                    var quebradeLinha = new A.Break();
+                    paragrafo.InsertAfter(quebradeLinha, ultimoElemento);
+                    ultimoElemento = quebradeLinha;
                 }
             }
-            runOriginal.Remove();
+            execucaoOriginal.Remove();
         }
 
-        // ─────────────────────────────────────────────────────────────────────
-        //  Substituição de Logo (Picture Shape nomeado "#LOGO#")
-        // ─────────────────────────────────────────────────────────────────────
-
-        private void SubstituirLogo(SlidePart slidePart, string caminhoLogo)
+        private void SubstituirLogo(SlidePart parteSlide, string caminhoLogo)
         {
             if (!File.Exists(caminhoLogo))
             {
-                Console.WriteLine($"[AVISO] Logo não encontrada: {caminhoLogo}. Pulando substituição.");
+                Console.WriteLine($"[AVISO] Logo nao encontrada: {caminhoLogo}. Pulando substituicao.");
                 return;
             }
-
-            // Localizar picture shape cujo atributo name seja "#LOGO#"
-            P.Picture? logoPic = null;
-            foreach (var pic in slidePart.Slide.Descendants<P.Picture>())
+            
+            P.Picture? imagemPlaceholder = null;
+            foreach (var figuraCandidada in parteSlide.Slide.Descendants<P.Picture>())
             {
-                var cNvPr = pic.NonVisualPictureProperties?.NonVisualDrawingProperties;
-                if (cNvPr?.Name?.Value == "#LOGO#")
+                var propriedadesVisuais = figuraCandidada.NonVisualPictureProperties?.NonVisualDrawingProperties;
+                if (propriedadesVisuais?.Name?.Value == "#LOGO#")
                 {
-                    logoPic = pic;
+                    imagemPlaceholder = figuraCandidada;
                     break;
                 }
             }
 
-            // Shape "#LOGO#" ausente neste slide — comportamento normal em slides sem logo
-            if (logoPic == null) return;
-
-            // Determinar content-type pela extensão do arquivo de logo
-            string ext = Path.GetExtension(caminhoLogo).ToLowerInvariant();
-            string contentType = ext switch
+            if (imagemPlaceholder == null) return;
+            
+            string extensaoArquivo = Path.GetExtension(caminhoLogo).ToLowerInvariant();
+            string tipoConteudo = extensaoArquivo switch
             {
                 ".png"  => "image/png",
                 ".jpg"  => "image/jpeg",
@@ -514,105 +444,94 @@ namespace AutomacaoAnalyticsRift
                 _       => "image/png"
             };
 
-            // Adicionar nova ImagePart ao SlidePart e alimentá-la com o arquivo da logo
-            ImagePart imagePart = slidePart.AddImagePart(contentType);
-            using (var stream = File.OpenRead(caminhoLogo))
-                imagePart.FeedData(stream);
+            ImagePart parteImagem = parteSlide.AddImagePart(tipoConteudo);
+            using (var fluxoLogo = File.OpenRead(caminhoLogo))
+                parteImagem.FeedData(fluxoLogo);
 
-            string novoRelId = slidePart.GetIdOfPart(imagePart);
+            string novoIdRelacionamento = parteSlide.GetIdOfPart(parteImagem);
 
-            // Atualizar o r:embed do <a:blip> para apontar para a nova imagem
-            var blip = logoPic.BlipFill?.Blip;
-            if (blip != null)
-                blip.Embed = novoRelId;
+            var elementoImagem = imagemPlaceholder.BlipFill?.Blip;
+            if (elementoImagem != null)
+                elementoImagem.Embed = novoIdRelacionamento;
 
-            // ── Ajustar proporção para não distorcer a imagem ──
             var dimensoes = ObterDimensoesImagem(caminhoLogo);
             if (dimensoes.Width > 0 && dimensoes.Height > 0)
             {
-                var transform = logoPic.ShapeProperties?.Transform2D;
-                if (transform?.Extents != null && transform.Extents.Cx != null && transform.Extents.Cy != null)
+                var transformacao = imagemPlaceholder.ShapeProperties?.Transform2D;
+                if (transformacao?.Extents != null && transformacao.Extents.Cx != null && transformacao.Extents.Cy != null)
                 {
-                    long cxOriginal = transform.Extents.Cx.Value;
-                    long cyOriginal = transform.Extents.Cy.Value;
+                    long larguraOriginalEMU = transformacao.Extents.Cx.Value;
+                    long alturaOriginalEMU  = transformacao.Extents.Cy.Value;
 
-                    double ratioPlaceholder = (double)cxOriginal / cyOriginal;
-                    double ratioImagem = (double)dimensoes.Width / dimensoes.Height;
+                    double proporcaoPlaceholder = (double)larguraOriginalEMU / alturaOriginalEMU;
+                    double proporcaoImagem      = (double)dimensoes.Width / dimensoes.Height;
 
-                    long novoCx, novoCy;
+                    long novaLargura, novaAltura;
 
-                    if (ratioImagem > ratioPlaceholder)
+                    if (proporcaoImagem > proporcaoPlaceholder)
                     {
-                        // Imagem original é mais "larga" que o placeholder
-                        novoCx = cxOriginal;
-                        novoCy = (long)(cxOriginal / ratioImagem);
+                        novaLargura = larguraOriginalEMU;
+                        novaAltura  = (long)(larguraOriginalEMU / proporcaoImagem);
                     }
                     else
                     {
-                        // Imagem original é mais "alta" que o placeholder
-                        novoCy = cyOriginal;
-                        novoCx = (long)(cyOriginal * ratioImagem);
+                        novaAltura  = alturaOriginalEMU;
+                        novaLargura = (long)(alturaOriginalEMU * proporcaoImagem);
                     }
 
-                    // Centralizar a nova imagem no espaço do placeholder original
-                    long diffX = (cxOriginal - novoCx) / 2;
-                    long diffY = (cyOriginal - novoCy) / 2;
+                    long deslocamentoX = (larguraOriginalEMU - novaLargura) / 2;
+                    long deslocamentoY = (alturaOriginalEMU  - novaAltura)  / 2;
 
-                    transform.Extents.Cx = novoCx;
-                    transform.Extents.Cy = novoCy;
+                    transformacao.Extents.Cx = novaLargura;
+                    transformacao.Extents.Cy = novaAltura;
 
-                    if (transform.Offset != null && transform.Offset.X != null && transform.Offset.Y != null)
+                    if (transformacao.Offset != null && transformacao.Offset.X != null && transformacao.Offset.Y != null)
                     {
-                        transform.Offset.X = transform.Offset.X.Value + diffX;
-                        transform.Offset.Y = transform.Offset.Y.Value + diffY;
+                        transformacao.Offset.X = transformacao.Offset.X.Value + deslocamentoX;
+                        transformacao.Offset.Y = transformacao.Offset.Y.Value + deslocamentoY;
                     }
                 }
             }
 
-            slidePart.Slide.Save();
+            parteSlide.Slide.Save();
         }
-
-        // ─────────────────────────────────────────────────────────────────────
-        //  Leitura nativa de dimensões de imagem (PNG/JPG)
-        // ─────────────────────────────────────────────────────────────────────
 
         private (int Width, int Height) ObterDimensoesImagem(string caminhoArquivo)
         {
             try
             {
-                using var fs = new FileStream(caminhoArquivo, FileMode.Open, FileAccess.Read);
-                using var br = new BinaryReader(fs);
+                using var fluxoArquivo  = new FileStream(caminhoArquivo, FileMode.Open, FileAccess.Read);
+                using var leitorBinario = new BinaryReader(fluxoArquivo);
 
-                var sig = br.ReadUInt64();
-                if (sig == 0x0A1A0A0D474E5089) // Header PNG
+                var assinaturaArquivo = leitorBinario.ReadUInt64();
+                if (assinaturaArquivo == 0x0A1A0A0D474E5089)
                 {
-                    fs.Position = 16;
-                    var wBytes = br.ReadBytes(4); Array.Reverse(wBytes);
-                    var hBytes = br.ReadBytes(4); Array.Reverse(hBytes);
-                    return (BitConverter.ToInt32(wBytes, 0), BitConverter.ToInt32(hBytes, 0));
+                    fluxoArquivo.Position = 16;
+                    var bytesLargura = leitorBinario.ReadBytes(4); Array.Reverse(bytesLargura);
+                    var bytesAltura  = leitorBinario.ReadBytes(4); Array.Reverse(bytesAltura);
+                    return (BitConverter.ToInt32(bytesLargura, 0), BitConverter.ToInt32(bytesAltura, 0));
                 }
 
-                fs.Position = 0;
-                if (br.ReadUInt16() == 0xD8FF) // Header JPEG
+                fluxoArquivo.Position = 0;
+                if (leitorBinario.ReadUInt16() == 0xD8FF)
                 {
-                    while (fs.Position < fs.Length)
+                    while (fluxoArquivo.Position < fluxoArquivo.Length)
                     {
-                        byte marker = br.ReadByte();
-                        if (marker != 0xFF) break;
-                        byte type = br.ReadByte();
-                        
-                        if (type >= 0xC0 && type <= 0xC3) // Frame markers (SOF0 - SOF3)
+                        byte marcador     = leitorBinario.ReadByte();
+                        if (marcador != 0xFF) break;
+                        byte tipoMarcador = leitorBinario.ReadByte();
+
+                        if (tipoMarcador >= 0xC0 && tipoMarcador <= 0xC3)
                         {
-                            fs.Seek(3, SeekOrigin.Current);
-                            var hBytes = br.ReadBytes(2); Array.Reverse(hBytes);
-                            var wBytes = br.ReadBytes(2); Array.Reverse(wBytes);
-                            return (BitConverter.ToUInt16(wBytes, 0), BitConverter.ToUInt16(hBytes, 0));
+                            fluxoArquivo.Seek(3, SeekOrigin.Current);
+                            var bytesAltura  = leitorBinario.ReadBytes(2); Array.Reverse(bytesAltura);
+                            var bytesLargura = leitorBinario.ReadBytes(2); Array.Reverse(bytesLargura);
+                            return (BitConverter.ToUInt16(bytesLargura, 0), BitConverter.ToUInt16(bytesAltura, 0));
                         }
                         
-                        // Pular o bloco atual
-                        var lenBytes = br.ReadBytes(2); Array.Reverse(lenBytes);
-                        int len = BitConverter.ToUInt16(lenBytes, 0);
-                        fs.Seek(len - 2, SeekOrigin.Current);
+                        var bytesTamanho = leitorBinario.ReadBytes(2); Array.Reverse(bytesTamanho);
+                        int tamanhoBloco = BitConverter.ToUInt16(bytesTamanho, 0);
+                        fluxoArquivo.Seek(tamanhoBloco - 2, SeekOrigin.Current);
                     }
                 }
             }
@@ -620,242 +539,213 @@ namespace AutomacaoAnalyticsRift
             return (0, 0);
         }
 
-        // ─────────────────────────────────────────────────────────────────────
-        //  Atualização de Gráfico (Excel embutido + cache + escala do eixo)
-        // ─────────────────────────────────────────────────────────────────────
-
-        private void AtualizarGrafico(PresentationPart pPart, P.SlideId slideId,
+        private void AtualizarGrafico(PresentationPart parteApresentacao, P.SlideId idSlide,
                                       List<(int Mes, double[] Valores)> dadosPorMes)
         {
-            SlidePart slidePart  = (SlidePart)pPart.GetPartById(slideId.RelationshipId!.Value!);
-            ChartPart? chartPart = slidePart.ChartParts.FirstOrDefault();
-            if (chartPart == null) return;
+            SlidePart  parteSlide   = (SlidePart)parteApresentacao.GetPartById(idSlide.RelationshipId!.Value!);
+            ChartPart? parteGrafico = parteSlide.ChartParts.FirstOrDefault();
+            if (parteGrafico == null) return;
 
-            // ── Atualizar planilha Excel embutida ─────────────────────────────
-            var excelPart = chartPart.EmbeddedPackagePart;
-            if (excelPart != null)
+            var parteExcel = parteGrafico.EmbeddedPackagePart;
+            if (parteExcel != null)
             {
-                using Stream stream            = excelPart.GetStream(FileMode.Open, FileAccess.ReadWrite);
-                using SpreadsheetDocument xlsx = SpreadsheetDocument.Open(stream, true);
+                using Stream               fluxoDados     = parteExcel.GetStream(FileMode.Open, FileAccess.ReadWrite);
+                using SpreadsheetDocument  documentoExcel = SpreadsheetDocument.Open(fluxoDados, true);
 
-                var workbookPart  = xlsx.WorkbookPart!;
-                var sheet         = workbookPart.Workbook.Descendants<S.Sheet>().FirstOrDefault();
-                if (sheet != null)
+                var partePlanilha = documentoExcel.WorkbookPart!;
+                var planilha      = partePlanilha.Workbook.Descendants<S.Sheet>().FirstOrDefault();
+                if (planilha != null)
                 {
-                    var worksheetPart = (WorksheetPart)workbookPart.GetPartById(sheet.Id!.Value!);
-                    var sheetData     = worksheetPart.Worksheet.Elements<S.SheetData>().FirstOrDefault();
+                    var parteAba      = (WorksheetPart)partePlanilha.GetPartById(planilha.Id!.Value!);
+                    var dadosPlanilha = parteAba.Worksheet.Elements<S.SheetData>().FirstOrDefault();
 
-                    if (sheetData != null)
+                    if (dadosPlanilha != null)
                     {
                         foreach (var (mes, valores) in dadosPorMes)
                         {
-                            uint rowIndex = (uint)(mes + 1);  // linha 1 = cabeçalho; mês 1 → linha 2
-                            S.Row? row = sheetData.Elements<S.Row>()
-                                .FirstOrDefault(r => r.RowIndex?.Value == rowIndex);
-                            if (row == null)
+                            uint    indiceLinha = (uint)(mes + 1);
+                            S.Row? linhaAtual   = dadosPlanilha.Elements<S.Row>()
+                                .FirstOrDefault(r => r.RowIndex?.Value == indiceLinha);
+                            if (linhaAtual == null)
                             {
-                                row = new S.Row { RowIndex = new UInt32Value(rowIndex) };
-                                sheetData.Append(row);
+                                linhaAtual = new S.Row { RowIndex = new UInt32Value(indiceLinha) };
+                                dadosPlanilha.Append(linhaAtual);
                             }
 
                             string[] colunas = { "B", "C", "D", "E" };
                             for (int i = 0; i < valores.Length && i < colunas.Length; i++)
                             {
-                                string cellRef = $"{colunas[i]}{rowIndex}";
-                                S.Cell? cell = row.Elements<S.Cell>()
-                                    .FirstOrDefault(c => c.CellReference?.Value == cellRef);
-                                if (cell == null)
+                                string  referenciaCelula = $"{colunas[i]}{indiceLinha}";
+                                S.Cell? celula           = linhaAtual.Elements<S.Cell>()
+                                    .FirstOrDefault(c => c.CellReference?.Value == referenciaCelula);
+                                if (celula == null)
                                 {
-                                    cell = new S.Cell { CellReference = new StringValue(cellRef) };
-                                    row.Append(cell);
+                                    celula = new S.Cell { CellReference = new StringValue(referenciaCelula) };
+                                    linhaAtual.Append(celula);
                                 }
-                                cell.CellValue = new S.CellValue(valores[i].ToString(CultureInfo.InvariantCulture));
-                                cell.DataType  = new EnumValue<S.CellValues>(S.CellValues.Number);
+                                celula.CellValue = new S.CellValue(valores[i].ToString(CultureInfo.InvariantCulture));
+                                celula.DataType  = new EnumValue<S.CellValues>(S.CellValues.Number);
                             }
                         }
                     }
                 }
             }
 
-            // ── Atualizar cache do gráfico (NumberingCache) ───────────────────
-            var chartSpace = chartPart.ChartSpace;
-            var seriesList = chartSpace.Descendants<C.SeriesText>().Select(s => s.Parent).ToList();
+            var espacoGrafico = parteGrafico.ChartSpace;
+            var listaSeries   = espacoGrafico.Descendants<C.SeriesText>().Select(s => s.Parent).ToList();
 
             foreach (var (mes, valores) in dadosPorMes)
             {
-                uint ptIndex = (uint)(mes - 1);  // mês 1 → índice 0
+                uint indicePonto = (uint)(mes - 1);
 
-                for (int i = 0; i < seriesList.Count && i < valores.Length; i++)
+                for (int i = 0; i < listaSeries.Count && i < valores.Length; i++)
                 {
-                    var valRef = seriesList[i]!.Descendants<C.NumberReference>().FirstOrDefault();
-                    if (valRef?.NumberingCache == null) continue;
+                    var referenciaValor = listaSeries[i]!.Descendants<C.NumberReference>().FirstOrDefault();
+                    if (referenciaValor?.NumberingCache == null) continue;
 
-                    var pt = valRef.NumberingCache.Descendants<C.NumericPoint>()
-                        .FirstOrDefault(p => p.Index?.Value == ptIndex);
+                    var pontoAtual = referenciaValor.NumberingCache.Descendants<C.NumericPoint>()
+                        .FirstOrDefault(p => p.Index?.Value == indicePonto);
 
-                    if (pt?.NumericValue != null)
+                    if (pontoAtual?.NumericValue != null)
                     {
-                        pt.NumericValue.Text = valores[i].ToString(CultureInfo.InvariantCulture);
+                        pontoAtual.NumericValue.Text = valores[i].ToString(CultureInfo.InvariantCulture);
                     }
                     else
                     {
-                        var newPt = new C.NumericPoint { Index = new UInt32Value(ptIndex) };
-                        newPt.Append(new C.NumericValue(valores[i].ToString(CultureInfo.InvariantCulture)));
-                        valRef.NumberingCache.Append(newPt);
+                        var novoPonto = new C.NumericPoint { Index = new UInt32Value(indicePonto) };
+                        novoPonto.Append(new C.NumericValue(valores[i].ToString(CultureInfo.InvariantCulture)));
+                        referenciaValor.NumberingCache.Append(novoPonto);
 
-                        var ptCount = valRef.NumberingCache.Descendants<C.PointCount>().FirstOrDefault();
-                        if (ptCount?.Val != null && ptCount.Val.Value <= ptIndex)
-                            ptCount.Val.Value = ptIndex + 1;
+                        var contadorPontos = referenciaValor.NumberingCache.Descendants<C.PointCount>().FirstOrDefault();
+                        if (contadorPontos?.Val != null && contadorPontos.Val.Value <= indicePonto)
+                            contadorPontos.Val.Value = indicePonto + 1;
                     }
 
-                    // Remover rótulo customizado existente para não conflitar com o novo valor
-                    var dLbl = seriesList[i]!.Descendants<C.DataLabel>()
-                        .FirstOrDefault(l => l.Index?.Val?.Value == ptIndex);
-                    dLbl?.Descendants<C.ChartText>().FirstOrDefault()?.Remove();
+                    var rotuloAtual = listaSeries[i]!.Descendants<C.DataLabel>()
+                        .FirstOrDefault(l => l.Index?.Val?.Value == indicePonto);
+                    rotuloAtual?.Descendants<C.ChartText>().FirstOrDefault()?.Remove();
                 }
             }
 
-            // ── Escala dinâmica do eixo vertical ──────────────────────────────
             double maxValorDados = dadosPorMes
                 .SelectMany(x => x.Valores)
                 .DefaultIfEmpty(0)
                 .Max();
 
-            var (axisMax, majorUnit) = CalcularEscalaEixo(maxValorDados);
+            var (maximoEixo, unidadePrincipal) = CalcularEscalaEixo(maxValorDados);
 
-            var valAx = chartSpace.Descendants<C.ValueAxis>().FirstOrDefault();
-            if (valAx != null)
+            var eixoVertical = espacoGrafico.Descendants<C.ValueAxis>().FirstOrDefault();
+            if (eixoVertical != null)
             {
-                // Máximo do eixo
-                var scaling = valAx.Descendants<C.Scaling>().FirstOrDefault();
-                if (scaling != null)
+                var escalonamento = eixoVertical.Descendants<C.Scaling>().FirstOrDefault();
+                if (escalonamento != null)
                 {
-                    var maxElem = scaling.Elements<C.MaxAxisValue>().FirstOrDefault();
-                    if (maxElem == null)
+                    var elementoMaximo = escalonamento.Elements<C.MaxAxisValue>().FirstOrDefault();
+                    if (elementoMaximo == null)
                     {
-                        maxElem = new C.MaxAxisValue();
-                        scaling.Append(maxElem);
+                        elementoMaximo = new C.MaxAxisValue();
+                        escalonamento.Append(elementoMaximo);
                     }
-                    maxElem.Val = axisMax;
+                    elementoMaximo.Val = maximoEixo;
                 }
 
-                // Unidade principal — controla linhas horizontais visíveis e labels do eixo
-                var majorElem = valAx.Elements<C.MajorUnit>().FirstOrDefault();
-                if (majorElem == null)
+                var elementoUnidadePrincipal = eixoVertical.Elements<C.MajorUnit>().FirstOrDefault();
+                if (elementoUnidadePrincipal == null)
                 {
-                    majorElem = new C.MajorUnit();
-                    valAx.Append(majorElem);
+                    elementoUnidadePrincipal = new C.MajorUnit();
+                    eixoVertical.Append(elementoUnidadePrincipal);
                 }
-                majorElem.Val = majorUnit;
+                elementoUnidadePrincipal.Val = unidadePrincipal;
 
-                // Unidade secundária (subdivisão interna = majorUnit / 5)
-                var minorElem = valAx.Elements<C.MinorUnit>().FirstOrDefault();
-                if (minorElem == null)
+                var elementoUnidadeSecundaria = eixoVertical.Elements<C.MinorUnit>().FirstOrDefault();
+                if (elementoUnidadeSecundaria == null)
                 {
-                    minorElem = new C.MinorUnit();
-                    valAx.Append(minorElem);
+                    elementoUnidadeSecundaria = new C.MinorUnit();
+                    eixoVertical.Append(elementoUnidadeSecundaria);
                 }
-                minorElem.Val = majorUnit / 5.0;
+                elementoUnidadeSecundaria.Val = unidadePrincipal / 5.0;
             }
 
-            chartPart.ChartSpace.Save();
+            parteGrafico.ChartSpace.Save();
         }
 
-        // ─────────────────────────────────────────────────────────────────────
-        //  Cálculo de Escala do Eixo Vertical
-        //  Regras: máximo ≥ valorMax × 1.25 | exatamente 9 intervalos | unidade "bonita"
-        // ─────────────────────────────────────────────────────────────────────
+        // =====================================================================
+        //  Calculo de Escala do Eixo Vertical
+        //  Regras: maximo >= valorMax x 1.25 | unidade divisivel por 5 na escala certa
+        // =====================================================================
 
         /// <summary>
-        /// Calcula o máximo do eixo e a unidade principal para que o gráfico exiba
-        /// exatamente 9 linhas horizontais entre 0 e o máximo, com o topo pelo menos
-        /// 25% acima do maior valor presente nos dados.
+        /// Calcula o maximo do eixo e a unidade principal para que o grafico exiba
+        /// valores divisiveis por 5 na escala correta, com o topo pelo menos 25% acima
+        /// do maior valor presente nos dados.
         /// </summary>
         private (double AxisMax, double MajorUnit) CalcularEscalaEixo(double maxValorDados)
         {
-            if (maxValorDados <= 0) maxValorDados = 9;  // mínimo para evitar divisão por zero
+            if (maxValorDados <= 0) maxValorDados = 9;
 
-            double rawMax  = maxValorDados * 1.25;   // pelo menos 25% acima do máximo dos dados
-            double rawUnit = rawMax / 9.0;           // 9 intervalos = 9 linhas horizontais
-            double major   = ArredondarNiceNumber(rawUnit);  // arredonda para número legível
-            double axisMax = major * 9.0;            // recalcula máximo com a unidade arredondada
+            double maximoBruto = maxValorDados * 1.25;
 
-            return (axisMax, major);
-        }
+            // passoArredondamento = 5 x 10^(n-1), onde n e a ordem de grandeza de maximoBruto.
+            // Para valores na casa dos 10.000-99.999: passoArredondamento = 5.000
+            // Para valores na casa dos 1.000-9.999:   passoArredondamento =   500
+            // Para valores na casa dos 100-999:        passoArredondamento =    50
+            double ordemGrandeza       = Math.Floor(Math.Log10(maximoBruto));
+            double passoArredondamento = 5 * Math.Pow(10, ordemGrandeza - 1);
 
-        /// <summary>
-        /// Arredonda <paramref name="valor"/> para cima para o número "bonito" mais próximo
-        /// da sequência 1 × 10^n, 2 × 10^n, 2.5 × 10^n, 5 × 10^n, 10 × 10^n.
-        /// Exemplos: 49,6 → 50 | 4.167 → 5.000 | 11,1 → 20 | 29,3 → 50
-        /// </summary>
-        private double ArredondarNiceNumber(double valor)
-        {
-            if (valor <= 0) return 1;
+            // Arredonda para o multiplo de passoArredondamento mais proximo, garantindo > maxValorDados
+            double maximoEixo = Math.Round(maximoBruto / passoArredondamento) * passoArredondamento;
+            if (maximoEixo <= maxValorDados) maximoEixo += passoArredondamento;
 
-            double expoente = Math.Floor(Math.Log10(valor));
-            double base10   = Math.Pow(10, expoente);
-            double fracao   = valor / base10;
+            // unidadePrincipal = passoArredondamento -> todos os labels serao multiplos de 5
+            // Se houver < 4 intervalos (grafico pequeno), divide por 5 para ter mais granularidade
+            double unidadePrincipal = (maximoEixo / passoArredondamento < 4) ? passoArredondamento / 5.0 : passoArredondamento;
 
-            double nice;
-            if      (fracao <= 1.0) nice = 1.0;
-            else if (fracao <= 2.0) nice = 2.0;
-            else if (fracao <= 2.5) nice = 2.5;
-            else if (fracao <= 5.0) nice = 5.0;
-            else                    nice = 10.0;
-
-            return nice * base10;
+            return (maximoEixo, unidadePrincipal);
         }
     }
-
-    // ══════════════════════════════════════════════════════════════════════════
-    //  Ponto de Entrada
-    // ══════════════════════════════════════════════════════════════════════════
 
     class Program
     {
         static void Main()
         {
-            // ── Caminhos de configuração (editar conforme necessário) ──────────
             string caminhoCredencial   = @"C:\Users\samu0\Documents\Analytics\analytics-automacao-1c71b3e01156.json";
             string caminhoClientesJson = @"C:\Users\samu0\Documents\Analytics\ClientesdaRIFT.json";
-            string caminhoTemplate     = @"C:\Users\samu0\Documents\Analytics\Modelo Padrão RIFT - SP.pptx";
+            string caminhoTemplate     = @"C:\Users\samu0\Documents\Analytics\Modelo Padrão RIFT.pptx";
             string pastaDestino        = @"C:\Users\samu0\Documents\Analytics\islaide gerado";
-
-            // ── Validações iniciais ───────────────────────────────────────────
+            
             if (!File.Exists(caminhoClientesJson))
             {
-                Console.WriteLine($"[ERRO] Arquivo de clientes não encontrado: {caminhoClientesJson}");
+                Console.WriteLine($"[ERRO] Arquivo de clientes nao encontrado: {caminhoClientesJson}");
                 return;
             }
 
             if (!File.Exists(caminhoTemplate))
             {
-                Console.WriteLine($"[ERRO] Template não encontrado: {caminhoTemplate}");
+                Console.WriteLine($"[ERRO] Template nao encontrado: {caminhoTemplate}");
                 return;
             }
 
-            var jsonText = File.ReadAllText(caminhoClientesJson);
-            var clientes = JsonSerializer.Deserialize<List<Cliente>>(jsonText);
+            var textoJson = File.ReadAllText(caminhoClientesJson);
+            var clientes  = JsonSerializer.Deserialize<List<Cliente>>(textoJson);
 
             if (clientes == null || clientes.Count == 0)
             {
-                Console.WriteLine("[ERRO] A lista de clientes está vazia ou o JSON está inválido.");
+                Console.WriteLine("[ERRO] A lista de clientes esta vazia ou o JSON esta invalido.");
                 return;
             }
+            
+            var servicoAnalytics = new AnalyticsService(caminhoCredencial);
+            var servicoSlide     = new SlideService();
 
-            // ── Processamento ─────────────────────────────────────────────────
-            var analyticsService = new AnalyticsService(caminhoCredencial);
-            var slideService     = new SlideService();
-
-            Console.WriteLine("--- Iniciando Automação de Relatórios ---");
+            Console.WriteLine("--- Iniciando Automacao de Relatorios ---");
 
             foreach (var cliente in clientes)
             {
                 try
                 {
                     Console.WriteLine($"\nProcessando: {cliente.Nome}");
-                    var dados = analyticsService.ObterDados(cliente.Ga4PropertyId);
-                    slideService.Gerar(cliente, dados, caminhoTemplate, pastaDestino);
+                    var dados = servicoAnalytics.ObterDados(cliente.Ga4PropertyId);
+                    servicoSlide.Gerar(cliente, dados, caminhoTemplate, pastaDestino);
                 }
                 catch (Exception ex)
                 {
