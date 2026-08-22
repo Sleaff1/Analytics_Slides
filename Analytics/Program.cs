@@ -526,7 +526,98 @@ namespace AutomacaoAnalyticsRift
             if (blip != null)
                 blip.Embed = novoRelId;
 
+            // ── Ajustar proporção para não distorcer a imagem ──
+            var dimensoes = ObterDimensoesImagem(caminhoLogo);
+            if (dimensoes.Width > 0 && dimensoes.Height > 0)
+            {
+                var transform = logoPic.ShapeProperties?.Transform2D;
+                if (transform?.Extents != null && transform.Extents.Cx != null && transform.Extents.Cy != null)
+                {
+                    long cxOriginal = transform.Extents.Cx.Value;
+                    long cyOriginal = transform.Extents.Cy.Value;
+
+                    double ratioPlaceholder = (double)cxOriginal / cyOriginal;
+                    double ratioImagem = (double)dimensoes.Width / dimensoes.Height;
+
+                    long novoCx, novoCy;
+
+                    if (ratioImagem > ratioPlaceholder)
+                    {
+                        // Imagem original é mais "larga" que o placeholder
+                        novoCx = cxOriginal;
+                        novoCy = (long)(cxOriginal / ratioImagem);
+                    }
+                    else
+                    {
+                        // Imagem original é mais "alta" que o placeholder
+                        novoCy = cyOriginal;
+                        novoCx = (long)(cyOriginal * ratioImagem);
+                    }
+
+                    // Centralizar a nova imagem no espaço do placeholder original
+                    long diffX = (cxOriginal - novoCx) / 2;
+                    long diffY = (cyOriginal - novoCy) / 2;
+
+                    transform.Extents.Cx = novoCx;
+                    transform.Extents.Cy = novoCy;
+
+                    if (transform.Offset != null && transform.Offset.X != null && transform.Offset.Y != null)
+                    {
+                        transform.Offset.X = transform.Offset.X.Value + diffX;
+                        transform.Offset.Y = transform.Offset.Y.Value + diffY;
+                    }
+                }
+            }
+
             slidePart.Slide.Save();
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        //  Leitura nativa de dimensões de imagem (PNG/JPG)
+        // ─────────────────────────────────────────────────────────────────────
+
+        private (int Width, int Height) ObterDimensoesImagem(string caminhoArquivo)
+        {
+            try
+            {
+                using var fs = new FileStream(caminhoArquivo, FileMode.Open, FileAccess.Read);
+                using var br = new BinaryReader(fs);
+
+                var sig = br.ReadUInt64();
+                if (sig == 0x0A1A0A0D474E5089) // Header PNG
+                {
+                    fs.Position = 16;
+                    var wBytes = br.ReadBytes(4); Array.Reverse(wBytes);
+                    var hBytes = br.ReadBytes(4); Array.Reverse(hBytes);
+                    return (BitConverter.ToInt32(wBytes, 0), BitConverter.ToInt32(hBytes, 0));
+                }
+
+                fs.Position = 0;
+                if (br.ReadUInt16() == 0xD8FF) // Header JPEG
+                {
+                    while (fs.Position < fs.Length)
+                    {
+                        byte marker = br.ReadByte();
+                        if (marker != 0xFF) break;
+                        byte type = br.ReadByte();
+                        
+                        if (type >= 0xC0 && type <= 0xC3) // Frame markers (SOF0 - SOF3)
+                        {
+                            fs.Seek(3, SeekOrigin.Current);
+                            var hBytes = br.ReadBytes(2); Array.Reverse(hBytes);
+                            var wBytes = br.ReadBytes(2); Array.Reverse(wBytes);
+                            return (BitConverter.ToUInt16(wBytes, 0), BitConverter.ToUInt16(hBytes, 0));
+                        }
+                        
+                        // Pular o bloco atual
+                        var lenBytes = br.ReadBytes(2); Array.Reverse(lenBytes);
+                        int len = BitConverter.ToUInt16(lenBytes, 0);
+                        fs.Seek(len - 2, SeekOrigin.Current);
+                    }
+                }
+            }
+            catch { }
+            return (0, 0);
         }
 
         // ─────────────────────────────────────────────────────────────────────
@@ -727,7 +818,7 @@ namespace AutomacaoAnalyticsRift
             // ── Caminhos de configuração (editar conforme necessário) ──────────
             string caminhoCredencial   = @"C:\Users\samu0\Documents\Analytics\analytics-automacao-1c71b3e01156.json";
             string caminhoClientesJson = @"C:\Users\samu0\Documents\Analytics\ClientesdaRIFT.json";
-            string caminhoTemplate     = @"C:\Users\samu0\Documents\Analytics\template.pptx";
+            string caminhoTemplate     = @"C:\Users\samu0\Documents\Analytics\Modelo Padrão RIFT - SP.pptx";
             string pastaDestino        = @"C:\Users\samu0\Documents\Analytics\islaide gerado";
 
             // ── Validações iniciais ───────────────────────────────────────────
