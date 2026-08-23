@@ -25,18 +25,11 @@ Ou seja, ideal para gerar um relatório mensal do site da sua empresa ou para fi
 `System.Text.Json` - Para parsing nativo da configuração.
 ## Instalação
 
-1. **Clone o repositório:**
+**Clone o repositório:**
 ```Bash
 git clone https://github.com/Sleaff1/Analytics_Slides
 ```
 **Ou apenas utilize a URL, dependedo da maneira que esteja realizando a clonagem**
-
-**Restaure e compile:**
-
-```Bash
-dotnet restore
-dotnet build -c Release
-```
 
 ## Autenticação Google Cloud
 
