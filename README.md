@@ -1,20 +1,20 @@
 
 # Slides Google Analytics
 
-Criador de slides em `C#` obtendo informações da `API do Google analytics` e inserido em um modelo pré feito pelo usuário.
+Criador de slides em `C#` obtendo informações da `API do Google analytics` e inserido em um modelo pré-feito pelo usuário.
 
-O sistema manipula os arquivos via OpenXML, dispensando a instalação do Pacote Office e introduzindo o conceito de "Templates vivos", onde o histórico de gráficos é acumulado de forma automática mês a mês no JSON do cliente
+O sistema manipula os arquivos via OpenXML, dispensando a instalação do Pacote Office e introduzindo o conceito de "Templates vivos", em que o histórico de gráficos é acumulado de forma automática mês a mês no JSON do cliente.
 
 Ou seja, ideal para gerar um relatório mensal do site da sua empresa ou para fins pessoais.
 ## Features
-**Modelos de slide**: O sistema atualiza diretamente a planilha base *(Excel embutido)* dos gráficos no arquivo original. Os gráficos tem seus dados armazenados e inseridos de acordo com o seu mês e ano no slide.
+**Modelos de slide**: O sistema atualiza diretamente a planilha base *(Excel embutido)* dos gráficos no arquivo original. Os gráficos têm seus dados armazenados e inseridos de acordo com o seu mês e ano no slide.
 
 **Zero Dependências**: Manipula a árvore XML dos slides. Não requer licenças ou processos do Microsoft Office rodando em segundo plano.
 
 **Orientado a Configuração**: Mapeamento de clientes, IDs de propriedade e diretórios gerenciados inteiramente por um arquivo genérico Clientes.json.
 
 **Tratamento de I/O**: Detecta bloqueios de arquivo (slides abertos pelo usuário final) e pula o processo sem interromper a fila de automação.
-## Dependencias
+## Dependências
 
 **O projeto utiliza os seguintes pacotes NuGet:**
 
@@ -31,7 +31,7 @@ Ou seja, ideal para gerar um relatório mensal do site da sua empresa ou para fi
 ```Bash
 git clone https://github.com/Sleaff1/Analytics_Slides
 ```
-**Ou apenas utilize a URL, dependedo da maneira que esteja realizando a clonagem**
+**Ou apenas utilize a URL, dependendo da maneira como esteja realizando a clonagem.**
 
 ## Autenticação Google Cloud
 
@@ -53,7 +53,7 @@ Alguns caminhos dentro do código devem ser alterados para que tudo funcione da 
 
 * `string caminhoTemplate     = @"sua_pasta";`: Template do slide que será utilizado na geração
 
-* `string pastaDestino        = @"sua_pasta";`: Local onde os slides sejam colocados após geração
+* `string pastaDestino        = @"sua_pasta";`: Local onde os slides serão colocados após geração
 
 
 
