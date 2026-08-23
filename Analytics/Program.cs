@@ -668,36 +668,19 @@ namespace AutomacaoAnalyticsRift
 
             parteGrafico.ChartSpace.Save();
         }
-
-        // =====================================================================
-        //  Calculo de Escala do Eixo Vertical
-        //  Regras: maximo >= valorMax x 1.25 | unidade divisivel por 5 na escala certa
-        // =====================================================================
-
-        /// <summary>
-        /// Calcula o maximo do eixo e a unidade principal para que o grafico exiba
-        /// valores divisiveis por 5 na escala correta, com o topo pelo menos 25% acima
-        /// do maior valor presente nos dados.
-        /// </summary>
+        
         private (double AxisMax, double MajorUnit) CalcularEscalaEixo(double maxValorDados)
         {
             if (maxValorDados <= 0) maxValorDados = 9;
 
             double maximoBruto = maxValorDados * 1.25;
-
-            // passoArredondamento = 5 x 10^(n-1), onde n e a ordem de grandeza de maximoBruto.
-            // Para valores na casa dos 10.000-99.999: passoArredondamento = 5.000
-            // Para valores na casa dos 1.000-9.999:   passoArredondamento =   500
-            // Para valores na casa dos 100-999:        passoArredondamento =    50
+            
             double ordemGrandeza       = Math.Floor(Math.Log10(maximoBruto));
             double passoArredondamento = 5 * Math.Pow(10, ordemGrandeza - 1);
-
-            // Arredonda para o multiplo de passoArredondamento mais proximo, garantindo > maxValorDados
+            
             double maximoEixo = Math.Round(maximoBruto / passoArredondamento) * passoArredondamento;
             if (maximoEixo <= maxValorDados) maximoEixo += passoArredondamento;
-
-            // unidadePrincipal = passoArredondamento -> todos os labels serao multiplos de 5
-            // Se houver < 4 intervalos (grafico pequeno), divide por 5 para ter mais granularidade
+            
             double unidadePrincipal = (maximoEixo / passoArredondamento < 4) ? passoArredondamento / 5.0 : passoArredondamento;
 
             return (maximoEixo, unidadePrincipal);
