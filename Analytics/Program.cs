@@ -344,7 +344,7 @@ namespace AutomacaoAnalyticsRift
         {
             var dicionarioSubstituicoes = new Dictionary<string, string>
             {
-                { "#MES_NOME#",      dados.Periodo.NomeMes         },
+                { "#MES_NOME#",      dados.Periodo.NomeMes          },
                 { "#ANO#",           dados.Periodo.Ano              },
                 { "#DIAS_MES#",      dados.Periodo.DiasFormatados   },
                 { "#SESSOES#",       dados.TotalSessoes             },
