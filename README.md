@@ -20,6 +20,8 @@ Ou seja, ideal para gerar um relatório mensal do site da sua empresa ou para fi
 
 `Google.Analytics.Data.V1Beta` - Cliente oficial da API do GA4.
 
+`Google.Apis.AnalyticsData.v1beta` - Necessário para funcionamento da API
+
 `DocumentFormat.OpenXml` - SDK para manipulação estrutural de documentos Office.
 
 `System.Text.Json` - Para parsing nativo da configuração.
