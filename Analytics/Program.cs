@@ -94,6 +94,7 @@ namespace AutomacaoAnalyticsRift
     public class AnalyticsService
     {
         private readonly GA.BetaAnalyticsDataClient _clienteGA4;
+        private GA.PropertyQuota? _quotaAtual;
 
         public AnalyticsService(string caminhoCredencialJson)
         {
@@ -147,6 +148,13 @@ namespace AutomacaoAnalyticsRift
             PreencherLista(dados.ListaCidades,     propriedadeGA4, dataInicio, dataFim, "city",              "activeUsers",    10, totalUsuariosNumero);
             PreencherLista(dados.ListaPaginas,     propriedadeGA4, dataInicio, dataFim, "pageTitle",         "screenPageViews",10, totalVisualizacoesNumero);
 
+            if (_quotaAtual != null)
+            {
+                int tokensPorHoraRestantes = _quotaAtual.TokensPerHour?.Remaining ?? 0;
+                int tokensPorDiaRestantes  = _quotaAtual.TokensPerDay?.Remaining  ?? 0;
+                Console.WriteLine($"  [Quota] Tokens restantes - Por hora: {tokensPorHoraRestantes} | Por dia: {tokensPorDiaRestantes}");
+            }
+
             return dados;
         }
 
@@ -155,9 +163,10 @@ namespace AutomacaoAnalyticsRift
         {
             var requisicao = new GA.RunReportRequest
             {
-                Property   = propriedade,
-                DateRanges = { new GA.DateRange { StartDate = dataInicio, EndDate = dataFim } },
-                Limit      = 10000
+                Property            = propriedade,
+                DateRanges          = { new GA.DateRange { StartDate = dataInicio, EndDate = dataFim } },
+                Limit               = 10000,
+                ReturnPropertyQuota = true
             };
 
             if (!string.IsNullOrEmpty(dimensao))
@@ -175,7 +184,11 @@ namespace AutomacaoAnalyticsRift
                 });
             }
 
-            return _clienteGA4.RunReport(requisicao);
+            var resposta = _clienteGA4.RunReport(requisicao);
+
+            _quotaAtual = resposta.PropertyQuota;
+
+            return resposta;
         }
 
         private void PreencherLista(List<string> lista, string propriedade, string dataInicio, string dataFim,
