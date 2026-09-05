@@ -1,7 +1,20 @@
 {
-  "version": 3,
+  "version": 4,
   "targets": {
     "net10.0": {
+      "BitMiracle.LibTiff.NET/2.4.649": {
+        "type": "package",
+        "compile": {
+          "lib/netstandard2.0/BitMiracle.LibTiff.NET.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/netstandard2.0/BitMiracle.LibTiff.NET.dll": {
+            "related": ".xml"
+          }
+        }
+      },
       "DocumentFormat.OpenXml/3.5.1": {
         "type": "package",
         "dependencies": {
@@ -326,6 +339,244 @@
           }
         }
       },
+      "SkiaSharp/3.119.1": {
+        "type": "package",
+        "dependencies": {
+          "SkiaSharp.NativeAssets.Win32": "3.119.1",
+          "SkiaSharp.NativeAssets.macOS": "3.119.1"
+        },
+        "compile": {
+          "ref/net8.0/SkiaSharp.dll": {}
+        },
+        "runtime": {
+          "lib/net8.0/SkiaSharp.dll": {
+            "related": ".pdb"
+          }
+        }
+      },
+      "SkiaSharp.NativeAssets.macOS/3.119.1": {
+        "type": "package",
+        "compile": {
+          "lib/net8.0/_._": {}
+        },
+        "runtime": {
+          "lib/net8.0/_._": {}
+        },
+        "runtimeTargets": {
+          "runtimes/osx/native/libSkiaSharp.dylib": {
+            "assetType": "native",
+            "rid": "osx"
+          }
+        }
+      },
+      "SkiaSharp.NativeAssets.Win32/3.119.1": {
+        "type": "package",
+        "compile": {
+          "lib/net8.0/_._": {}
+        },
+        "runtime": {
+          "lib/net8.0/_._": {}
+        },
+        "runtimeTargets": {
+          "runtimes/win-arm64/native/libSkiaSharp.dll": {
+            "assetType": "native",
+            "rid": "win-arm64"
+          },
+          "runtimes/win-x64/native/libSkiaSharp.dll": {
+            "assetType": "native",
+            "rid": "win-x64"
+          },
+          "runtimes/win-x86/native/libSkiaSharp.dll": {
+            "assetType": "native",
+            "rid": "win-x86"
+          }
+        }
+      },
+      "Syncfusion.Compression.NET/34.2.6": {
+        "type": "package",
+        "compile": {
+          "lib/net10.0/Syncfusion.Compression.NET.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net10.0/Syncfusion.Compression.NET.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "Syncfusion.Licensing/34.2.6": {
+        "type": "package",
+        "compile": {
+          "lib/net10.0/Syncfusion.Licensing.dll": {}
+        },
+        "runtime": {
+          "lib/net10.0/Syncfusion.Licensing.dll": {}
+        }
+      },
+      "Syncfusion.Markdown/34.2.6": {
+        "type": "package",
+        "dependencies": {
+          "Syncfusion.Licensing": "34.2.6",
+          "Syncfusion.Telemetry": "34.2.6"
+        },
+        "compile": {
+          "lib/net10.0/Syncfusion.Markdown.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net10.0/Syncfusion.Markdown.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "Syncfusion.MetafileRenderer.NET/34.2.6": {
+        "type": "package",
+        "dependencies": {
+          "SkiaSharp": "3.119.1",
+          "Syncfusion.Compression.NET": "34.2.6",
+          "Syncfusion.Licensing": "34.2.6",
+          "Syncfusion.Pdf.NET": "34.2.6",
+          "Syncfusion.Telemetry": "34.2.6"
+        },
+        "compile": {
+          "lib/net10.0/Syncfusion.MetafileRenderer.NET.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net10.0/Syncfusion.MetafileRenderer.NET.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "Syncfusion.OfficeChart.NET/34.2.6": {
+        "type": "package",
+        "dependencies": {
+          "Syncfusion.Compression.NET": "34.2.6"
+        },
+        "compile": {
+          "lib/net10.0/Syncfusion.OfficeChart.NET.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net10.0/Syncfusion.OfficeChart.NET.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "Syncfusion.Pdf.Imaging.NET/34.2.6": {
+        "type": "package",
+        "dependencies": {
+          "BitMiracle.LibTiff.NET": "2.4.649",
+          "SkiaSharp": "3.119.1",
+          "Syncfusion.Compression.NET": "34.2.6",
+          "Syncfusion.Pdf.NET": "34.2.6"
+        },
+        "compile": {
+          "lib/net10.0/Syncfusion.Pdf.Imaging.NET.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net10.0/Syncfusion.Pdf.Imaging.NET.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "Syncfusion.Pdf.NET/34.2.6": {
+        "type": "package",
+        "dependencies": {
+          "Syncfusion.Compression.NET": "34.2.6",
+          "Syncfusion.Licensing": "34.2.6",
+          "Syncfusion.Telemetry": "34.2.6"
+        },
+        "compile": {
+          "lib/net10.0/Syncfusion.Pdf.NET.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net10.0/Syncfusion.Pdf.NET.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "Syncfusion.Presentation.NET/34.2.6": {
+        "type": "package",
+        "dependencies": {
+          "Syncfusion.Compression.NET": "34.2.6",
+          "Syncfusion.Licensing": "34.2.6",
+          "Syncfusion.Markdown": "34.2.6",
+          "Syncfusion.OfficeChart.NET": "34.2.6",
+          "Syncfusion.Telemetry": "34.2.6"
+        },
+        "compile": {
+          "lib/net10.0/Syncfusion.Presentation.NET.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net10.0/Syncfusion.Presentation.NET.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "Syncfusion.PresentationRenderer.NET/34.2.6": {
+        "type": "package",
+        "dependencies": {
+          "SkiaSharp": "3.119.1",
+          "Syncfusion.Compression.NET": "34.2.6",
+          "Syncfusion.MetafileRenderer.NET": "34.2.6",
+          "Syncfusion.OfficeChart.NET": "34.2.6",
+          "Syncfusion.Pdf.Imaging.NET": "34.2.6",
+          "Syncfusion.Pdf.NET": "34.2.6",
+          "Syncfusion.Presentation.NET": "34.2.6",
+          "Syncfusion.SkiaSharpHelper.NET": "34.2.6"
+        },
+        "compile": {
+          "lib/net10.0/Syncfusion.PresentationRenderer.NET.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net10.0/Syncfusion.PresentationRenderer.NET.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "Syncfusion.SkiaSharpHelper.NET/34.2.6": {
+        "type": "package",
+        "dependencies": {
+          "SkiaSharp": "3.119.1",
+          "Syncfusion.Compression.NET": "34.2.6"
+        },
+        "compile": {
+          "lib/net10.0/Syncfusion.SkiaSharpHelper.NET.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net10.0/Syncfusion.SkiaSharpHelper.NET.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "Syncfusion.Telemetry/34.2.6": {
+        "type": "package",
+        "compile": {
+          "lib/net10.0/Syncfusion.Telemetry.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net10.0/Syncfusion.Telemetry.dll": {
+            "related": ".xml"
+          }
+        }
+      },
       "System.CodeDom/7.0.0": {
         "type": "package",
         "compile": {
@@ -386,6 +637,21 @@
     }
   },
   "libraries": {
+    "BitMiracle.LibTiff.NET/2.4.649": {
+      "sha512": "XCEdfCphKo0UAvSg1h/OzOFWtjkIGnPMAziYkNqV7NVrqb/tZJTBxJhxIEX7gpvQwg8GIRYt133SUncfkKfjLA==",
+      "type": "package",
+      "path": "bitmiracle.libtiff.net/2.4.649",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "bitmiracle.libtiff.net.2.4.649.nupkg.sha512",
+        "bitmiracle.libtiff.net.nuspec",
+        "lib/net40/BitMiracle.LibTiff.NET.dll",
+        "lib/net40/BitMiracle.LibTiff.NET.xml",
+        "lib/netstandard2.0/BitMiracle.LibTiff.NET.dll",
+        "lib/netstandard2.0/BitMiracle.LibTiff.NET.xml"
+      ]
+    },
     "DocumentFormat.OpenXml/3.5.1": {
       "sha512": "zxdOf5VVCe/uNklbRhj8dVBzQGj3DoqkUuqOp9cAZVuN8mNYDjof1lvSQA2OQNr8Ptc9d7pbA7Azq/ReaI3FpA==",
       "type": "package",
@@ -928,6 +1194,367 @@
         "packageIcon.png"
       ]
     },
+    "SkiaSharp/3.119.1": {
+      "sha512": "+Ru1BTSZQne3Vp+vbSb50Ke3Nlc3ZnItxx4+751J9WZ8YzLKAV/n+9DAo4zFTyeCI//ueT63c+VybmTTpYBEiw==",
+      "type": "package",
+      "path": "skiasharp/3.119.1",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE.txt",
+        "README.md",
+        "icon.png",
+        "interactive-extensions/dotnet/SkiaSharp.DotNet.Interactive.dll",
+        "lib/net462/SkiaSharp.dll",
+        "lib/net462/SkiaSharp.pdb",
+        "lib/net6.0/SkiaSharp.dll",
+        "lib/net6.0/SkiaSharp.pdb",
+        "lib/net8.0-android34.0/SkiaSharp.dll",
+        "lib/net8.0-android34.0/SkiaSharp.pdb",
+        "lib/net8.0-android34.0/SkiaSharp.xml",
+        "lib/net8.0-ios17.0/SkiaSharp.dll",
+        "lib/net8.0-ios17.0/SkiaSharp.pdb",
+        "lib/net8.0-maccatalyst17.0/SkiaSharp.dll",
+        "lib/net8.0-maccatalyst17.0/SkiaSharp.pdb",
+        "lib/net8.0-macos14.0/SkiaSharp.dll",
+        "lib/net8.0-macos14.0/SkiaSharp.pdb",
+        "lib/net8.0-tizen7.0/SkiaSharp.dll",
+        "lib/net8.0-tizen7.0/SkiaSharp.pdb",
+        "lib/net8.0-tvos17.0/SkiaSharp.dll",
+        "lib/net8.0-tvos17.0/SkiaSharp.pdb",
+        "lib/net8.0-windows10.0.19041/SkiaSharp.dll",
+        "lib/net8.0-windows10.0.19041/SkiaSharp.pdb",
+        "lib/net8.0/SkiaSharp.dll",
+        "lib/net8.0/SkiaSharp.pdb",
+        "lib/netstandard2.0/SkiaSharp.dll",
+        "lib/netstandard2.0/SkiaSharp.pdb",
+        "lib/netstandard2.1/SkiaSharp.dll",
+        "lib/netstandard2.1/SkiaSharp.pdb",
+        "ref/net462/SkiaSharp.dll",
+        "ref/net6.0/SkiaSharp.dll",
+        "ref/net8.0-android34.0/SkiaSharp.dll",
+        "ref/net8.0-ios17.0/SkiaSharp.dll",
+        "ref/net8.0-maccatalyst17.0/SkiaSharp.dll",
+        "ref/net8.0-macos14.0/SkiaSharp.dll",
+        "ref/net8.0-tizen7.0/SkiaSharp.dll",
+        "ref/net8.0-tvos17.0/SkiaSharp.dll",
+        "ref/net8.0-windows10.0.19041/SkiaSharp.dll",
+        "ref/net8.0/SkiaSharp.dll",
+        "ref/netstandard2.0/SkiaSharp.dll",
+        "ref/netstandard2.1/SkiaSharp.dll",
+        "skiasharp.3.119.1.nupkg.sha512",
+        "skiasharp.nuspec"
+      ]
+    },
+    "SkiaSharp.NativeAssets.macOS/3.119.1": {
+      "sha512": "6hR3BdLhApjDxR1bFrJ7/lMydPfI01s3K+3WjIXFUlfC0MFCFCwRzv+JtzIkW9bDXs7XUVQS+6EVf0uzCasnGQ==",
+      "type": "package",
+      "path": "skiasharp.nativeassets.macos/3.119.1",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE.txt",
+        "README.md",
+        "THIRD-PARTY-NOTICES.txt",
+        "build/net462/SkiaSharp.NativeAssets.macOS.targets",
+        "buildTransitive/net462/SkiaSharp.NativeAssets.macOS.targets",
+        "buildTransitive/net8.0-macos14.0/SkiaSharp.NativeAssets.macOS.targets",
+        "icon.png",
+        "lib/net462/_._",
+        "lib/net6.0/_._",
+        "lib/net8.0-macos14.0/_._",
+        "lib/net8.0/_._",
+        "lib/netstandard2.0/_._",
+        "lib/netstandard2.1/_._",
+        "runtimes/osx/native/libSkiaSharp.dylib",
+        "skiasharp.nativeassets.macos.3.119.1.nupkg.sha512",
+        "skiasharp.nativeassets.macos.nuspec"
+      ]
+    },
+    "SkiaSharp.NativeAssets.Win32/3.119.1": {
+      "sha512": "8C4GSXVJqSr0y3Tyyv5jz6MJSTVUyYkMjeKrzK+VyZPGLo89MNoUEclVuYahzOCDdtbfXrd2HtxXfDuvoSXrUw==",
+      "type": "package",
+      "path": "skiasharp.nativeassets.win32/3.119.1",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE.txt",
+        "README.md",
+        "THIRD-PARTY-NOTICES.txt",
+        "build/net462/SkiaSharp.NativeAssets.Win32.targets",
+        "buildTransitive/net462/SkiaSharp.NativeAssets.Win32.targets",
+        "icon.png",
+        "lib/net462/_._",
+        "lib/net6.0-windows10.0.19041/_._",
+        "lib/net6.0/_._",
+        "lib/net8.0-windows10.0.19041/_._",
+        "lib/net8.0/_._",
+        "lib/netstandard2.0/_._",
+        "lib/netstandard2.1/_._",
+        "runtimes/win-arm64/native/libSkiaSharp.dll",
+        "runtimes/win-x64/native/libSkiaSharp.dll",
+        "runtimes/win-x86/native/libSkiaSharp.dll",
+        "skiasharp.nativeassets.win32.3.119.1.nupkg.sha512",
+        "skiasharp.nativeassets.win32.nuspec"
+      ]
+    },
+    "Syncfusion.Compression.NET/34.2.6": {
+      "sha512": "VxDKXW1ygoiWx/6wAkmg6x4+UMzrNmVctALXpsdP7x+MuUB7HtzaMSSTPYn3YUDPieW6fvG9f+M3ohD9vRLuhA==",
+      "type": "package",
+      "path": "syncfusion.compression.net/34.2.6",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE.txt",
+        "lib/net10.0/Syncfusion.Compression.NET.dll",
+        "lib/net10.0/Syncfusion.Compression.NET.xml",
+        "lib/net8.0/Syncfusion.Compression.NET.dll",
+        "lib/net8.0/Syncfusion.Compression.NET.xml",
+        "lib/net9.0/Syncfusion.Compression.NET.dll",
+        "lib/net9.0/Syncfusion.Compression.NET.xml",
+        "lib/netstandard2.0/Syncfusion.Compression.NET.dll",
+        "lib/netstandard2.0/Syncfusion.Compression.NET.xml",
+        "syncfusion.compression.net.34.2.6.nupkg.sha512",
+        "syncfusion.compression.net.nuspec",
+        "syncfusion_logo.png"
+      ]
+    },
+    "Syncfusion.Licensing/34.2.6": {
+      "sha512": "8fxwxyTfao+O1VJwrTDn1PvPSWnPAQUK1FGuQGVKw4H0LJka3Qzg6zNOoc5jtldfCi7nwOn/vCmU47UG2x6Emw==",
+      "type": "package",
+      "path": "syncfusion.licensing/34.2.6",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE.txt",
+        "README.md",
+        "lib/net10.0/Syncfusion.Licensing.dll",
+        "lib/net462/Syncfusion.Licensing.dll",
+        "lib/net8.0/Syncfusion.Licensing.dll",
+        "lib/net9.0/Syncfusion.Licensing.dll",
+        "lib/netstandard2.0/Syncfusion.Licensing.dll",
+        "lib/uap10.0/Syncfusion.Licensing.dll",
+        "syncfusion.licensing.34.2.6.nupkg.sha512",
+        "syncfusion.licensing.nuspec",
+        "syncfusion_logo.png"
+      ]
+    },
+    "Syncfusion.Markdown/34.2.6": {
+      "sha512": "LNNs842ItYRfqt9vkvQuiWig6UE9Z1Jo25+qlVNq7qtkSZxp8RafV8NUZKQdAgaYzUqpibgNhVsUjH1yy5uXUg==",
+      "type": "package",
+      "path": "syncfusion.markdown/34.2.6",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE.txt",
+        "README.md",
+        "lib/net10.0-windows7.0/Syncfusion.Markdown.dll",
+        "lib/net10.0-windows7.0/Syncfusion.Markdown.xml",
+        "lib/net10.0/Syncfusion.Markdown.dll",
+        "lib/net10.0/Syncfusion.Markdown.xml",
+        "lib/net462/Syncfusion.Markdown.dll",
+        "lib/net462/Syncfusion.Markdown.xml",
+        "lib/net8.0-windows7.0/Syncfusion.Markdown.dll",
+        "lib/net8.0-windows7.0/Syncfusion.Markdown.xml",
+        "lib/net8.0/Syncfusion.Markdown.dll",
+        "lib/net8.0/Syncfusion.Markdown.xml",
+        "lib/net9.0-windows7.0/Syncfusion.Markdown.dll",
+        "lib/net9.0-windows7.0/Syncfusion.Markdown.xml",
+        "lib/net9.0/Syncfusion.Markdown.dll",
+        "lib/net9.0/Syncfusion.Markdown.xml",
+        "lib/netstandard2.0/Syncfusion.Markdown.dll",
+        "lib/netstandard2.0/Syncfusion.Markdown.xml",
+        "lib/uap10.0/Syncfusion.Markdown.dll",
+        "lib/uap10.0/Syncfusion.Markdown.xml",
+        "syncfusion.markdown.34.2.6.nupkg.sha512",
+        "syncfusion.markdown.nuspec",
+        "syncfusion_logo.png"
+      ]
+    },
+    "Syncfusion.MetafileRenderer.NET/34.2.6": {
+      "sha512": "R1tNYbpwBI4w409bnGMGtoTJtHlcU5hDUwtJXdsyl9lRx3uASnzMl2RKgba5GXOJ92LhHLUAKbMv+K535Qs3rg==",
+      "type": "package",
+      "path": "syncfusion.metafilerenderer.net/34.2.6",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE.txt",
+        "README.md",
+        "lib/net10.0/Syncfusion.MetafileRenderer.NET.dll",
+        "lib/net10.0/Syncfusion.MetafileRenderer.NET.xml",
+        "lib/net8.0/Syncfusion.MetafileRenderer.NET.dll",
+        "lib/net8.0/Syncfusion.MetafileRenderer.NET.xml",
+        "lib/net9.0/Syncfusion.MetafileRenderer.NET.dll",
+        "lib/net9.0/Syncfusion.MetafileRenderer.NET.xml",
+        "lib/netstandard2.0/Syncfusion.MetafileRenderer.NET.dll",
+        "lib/netstandard2.0/Syncfusion.MetafileRenderer.NET.xml",
+        "syncfusion.metafilerenderer.net.34.2.6.nupkg.sha512",
+        "syncfusion.metafilerenderer.net.nuspec",
+        "syncfusion_logo.png"
+      ]
+    },
+    "Syncfusion.OfficeChart.NET/34.2.6": {
+      "sha512": "wOaUueABBPhotTOyYoFNzyvDLdG3iFnYR5f0ozGk9j1SDnmitp2/fkdQMHK8h+yPO1OXnhqTltFMs+iBOcYcbg==",
+      "type": "package",
+      "path": "syncfusion.officechart.net/34.2.6",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE.txt",
+        "lib/net10.0/Syncfusion.OfficeChart.NET.dll",
+        "lib/net10.0/Syncfusion.OfficeChart.NET.xml",
+        "lib/net8.0/Syncfusion.OfficeChart.NET.dll",
+        "lib/net8.0/Syncfusion.OfficeChart.NET.xml",
+        "lib/net9.0/Syncfusion.OfficeChart.NET.dll",
+        "lib/net9.0/Syncfusion.OfficeChart.NET.xml",
+        "lib/netstandard2.0/Syncfusion.OfficeChart.NET.dll",
+        "lib/netstandard2.0/Syncfusion.OfficeChart.NET.xml",
+        "syncfusion.officechart.net.34.2.6.nupkg.sha512",
+        "syncfusion.officechart.net.nuspec",
+        "syncfusion_logo.png"
+      ]
+    },
+    "Syncfusion.Pdf.Imaging.NET/34.2.6": {
+      "sha512": "2LIp88FiP0OxZdgrRHtLb+inWYxYbRkLaC9GRMkiEJzhYGh58JJVmJ5Jr+8ErFPO/I143b/l4Q7RSnJtAMQ4mQ==",
+      "type": "package",
+      "path": "syncfusion.pdf.imaging.net/34.2.6",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE.txt",
+        "README.md",
+        "lib/net10.0/Syncfusion.Pdf.Imaging.NET.dll",
+        "lib/net10.0/Syncfusion.Pdf.Imaging.NET.xml",
+        "lib/net8.0/Syncfusion.Pdf.Imaging.NET.dll",
+        "lib/net8.0/Syncfusion.Pdf.Imaging.NET.xml",
+        "lib/net9.0/Syncfusion.Pdf.Imaging.NET.dll",
+        "lib/net9.0/Syncfusion.Pdf.Imaging.NET.xml",
+        "lib/netstandard2.0/Syncfusion.Pdf.Imaging.NET.dll",
+        "lib/netstandard2.0/Syncfusion.Pdf.Imaging.NET.xml",
+        "syncfusion.pdf.imaging.net.34.2.6.nupkg.sha512",
+        "syncfusion.pdf.imaging.net.nuspec",
+        "syncfusion_logo.png"
+      ]
+    },
+    "Syncfusion.Pdf.NET/34.2.6": {
+      "sha512": "czrnaAP3Iio6L8ufI5VfUn/Biivxc2DBtrHxoMX3hbcTK1jLOt0XC5hGC2y9erDyMEB1bRf+rbqgIqAWzWdyAA==",
+      "type": "package",
+      "path": "syncfusion.pdf.net/34.2.6",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE.txt",
+        "README.md",
+        "lib/net10.0/Syncfusion.Pdf.NET.dll",
+        "lib/net10.0/Syncfusion.Pdf.NET.xml",
+        "lib/net8.0/Syncfusion.Pdf.NET.dll",
+        "lib/net8.0/Syncfusion.Pdf.NET.xml",
+        "lib/net9.0/Syncfusion.Pdf.NET.dll",
+        "lib/net9.0/Syncfusion.Pdf.NET.xml",
+        "lib/netstandard2.0/Syncfusion.Pdf.NET.dll",
+        "lib/netstandard2.0/Syncfusion.Pdf.NET.xml",
+        "syncfusion.pdf.net.34.2.6.nupkg.sha512",
+        "syncfusion.pdf.net.nuspec",
+        "syncfusion_logo.png"
+      ]
+    },
+    "Syncfusion.Presentation.NET/34.2.6": {
+      "sha512": "FHLMXkjJgCeynhcF/mJYsC/xG4IVYpQQlO/0GTrtbd692x1AIQtR+fB+Gb3vClR3LWAZxQfQ5AKroyDYGX5p8g==",
+      "type": "package",
+      "path": "syncfusion.presentation.net/34.2.6",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE.txt",
+        "README.md",
+        "lib/net10.0/Syncfusion.Presentation.NET.dll",
+        "lib/net10.0/Syncfusion.Presentation.NET.xml",
+        "lib/net8.0/Syncfusion.Presentation.NET.dll",
+        "lib/net8.0/Syncfusion.Presentation.NET.xml",
+        "lib/net9.0/Syncfusion.Presentation.NET.dll",
+        "lib/net9.0/Syncfusion.Presentation.NET.xml",
+        "lib/netstandard2.0/Syncfusion.Presentation.NET.dll",
+        "lib/netstandard2.0/Syncfusion.Presentation.NET.xml",
+        "syncfusion.presentation.net.34.2.6.nupkg.sha512",
+        "syncfusion.presentation.net.nuspec",
+        "syncfusion_logo.png"
+      ]
+    },
+    "Syncfusion.PresentationRenderer.NET/34.2.6": {
+      "sha512": "uCIwfBrD+OAtWMZUOgJUoBMcFglBgRAsSxQG431ey2YPTrTgcUS0gi0GXM4x4Dt7FmHSZ8HPZIuqeqXSiyW5dQ==",
+      "type": "package",
+      "path": "syncfusion.presentationrenderer.net/34.2.6",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE.txt",
+        "README.md",
+        "lib/net10.0/Syncfusion.PresentationRenderer.NET.dll",
+        "lib/net10.0/Syncfusion.PresentationRenderer.NET.xml",
+        "lib/net8.0/Syncfusion.PresentationRenderer.NET.dll",
+        "lib/net8.0/Syncfusion.PresentationRenderer.NET.xml",
+        "lib/net9.0/Syncfusion.PresentationRenderer.NET.dll",
+        "lib/net9.0/Syncfusion.PresentationRenderer.NET.xml",
+        "lib/netstandard2.0/Syncfusion.PresentationRenderer.NET.dll",
+        "lib/netstandard2.0/Syncfusion.PresentationRenderer.NET.xml",
+        "syncfusion.presentationrenderer.net.34.2.6.nupkg.sha512",
+        "syncfusion.presentationrenderer.net.nuspec",
+        "syncfusion_logo.png"
+      ]
+    },
+    "Syncfusion.SkiaSharpHelper.NET/34.2.6": {
+      "sha512": "O4TSyq1XvgUDW60/I7mPKfgC+Z4HWqI+Qc2DmPbl1Nn0dyDkMiVt8LC1Lb8FCsOv8CrZKc/oVWXKjNvV6gk3DA==",
+      "type": "package",
+      "path": "syncfusion.skiasharphelper.net/34.2.6",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE.txt",
+        "lib/net10.0/Syncfusion.SkiaSharpHelper.NET.dll",
+        "lib/net10.0/Syncfusion.SkiaSharpHelper.NET.xml",
+        "lib/net8.0/Syncfusion.SkiaSharpHelper.NET.dll",
+        "lib/net8.0/Syncfusion.SkiaSharpHelper.NET.xml",
+        "lib/net9.0/Syncfusion.SkiaSharpHelper.NET.dll",
+        "lib/net9.0/Syncfusion.SkiaSharpHelper.NET.xml",
+        "lib/netstandard2.0/Syncfusion.SkiaSharpHelper.NET.dll",
+        "lib/netstandard2.0/Syncfusion.SkiaSharpHelper.NET.xml",
+        "syncfusion.skiasharphelper.net.34.2.6.nupkg.sha512",
+        "syncfusion.skiasharphelper.net.nuspec",
+        "syncfusion_logo.png"
+      ]
+    },
+    "Syncfusion.Telemetry/34.2.6": {
+      "sha512": "hiCndmWPyibvIb84hr0IfWoRvWzZRh8EXS4Cx9Qgxjs0R2g9o6tmos+pUpQZiBBsvQPgWThAeLnJDL5P+06dsQ==",
+      "type": "package",
+      "path": "syncfusion.telemetry/34.2.6",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE.txt",
+        "README.md",
+        "lib/net10.0-windows7.0/Syncfusion.Telemetry.dll",
+        "lib/net10.0-windows7.0/Syncfusion.Telemetry.xml",
+        "lib/net10.0/Syncfusion.Telemetry.dll",
+        "lib/net10.0/Syncfusion.Telemetry.xml",
+        "lib/net462/Syncfusion.Telemetry.dll",
+        "lib/net462/Syncfusion.Telemetry.xml",
+        "lib/net8.0-windows7.0/Syncfusion.Telemetry.dll",
+        "lib/net8.0-windows7.0/Syncfusion.Telemetry.xml",
+        "lib/net8.0/Syncfusion.Telemetry.dll",
+        "lib/net8.0/Syncfusion.Telemetry.xml",
+        "lib/net9.0-windows7.0/Syncfusion.Telemetry.dll",
+        "lib/net9.0-windows7.0/Syncfusion.Telemetry.xml",
+        "lib/net9.0/Syncfusion.Telemetry.dll",
+        "lib/net9.0/Syncfusion.Telemetry.xml",
+        "lib/netstandard2.0/Syncfusion.Telemetry.dll",
+        "lib/netstandard2.0/Syncfusion.Telemetry.xml",
+        "lib/uap10.0/Syncfusion.Telemetry.dll",
+        "lib/uap10.0/Syncfusion.Telemetry.xml",
+        "syncfusion.telemetry.34.2.6.nupkg.sha512",
+        "syncfusion.telemetry.nuspec",
+        "syncfusion_logo.png"
+      ]
+    },
     "System.CodeDom/7.0.0": {
       "sha512": "GLltyqEsE5/3IE+zYRP5sNa1l44qKl9v+bfdMcwg+M9qnQf47wK3H0SUR/T+3N4JEQXF3vV4CSuuo0rsg+nq2A==",
       "type": "package",
@@ -1016,7 +1643,8 @@
     "net10.0": [
       "DocumentFormat.OpenXml >= 3.5.1",
       "Google.Analytics.Data.V1Beta >= 2.0.0-beta10",
-      "Google.Apis.AnalyticsData.v1beta >= 1.74.0.3608"
+      "Google.Apis.AnalyticsData.v1beta >= 1.74.0.3608",
+      "Syncfusion.PresentationRenderer.Net >= *"
     ]
   },
   "packageFolders": {
@@ -1050,6 +1678,7 @@
       },
       "frameworks": {
         "net10.0": {
+          "framework": "net10.0",
           "targetAlias": "net10.0",
           "projectReferences": {}
         }
@@ -1068,6 +1697,7 @@
     },
     "frameworks": {
       "net10.0": {
+        "framework": "net10.0",
         "targetAlias": "net10.0",
         "dependencies": {
           "DocumentFormat.OpenXml": {
@@ -1081,6 +1711,10 @@
           "Google.Apis.AnalyticsData.v1beta": {
             "target": "Package",
             "version": "[1.74.0.3608, )"
+          },
+          "Syncfusion.PresentationRenderer.Net": {
+            "target": "Package",
+            "version": "[*, )"
           }
         },
         "imports": [

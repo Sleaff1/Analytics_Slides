@@ -136,11 +136,10 @@ namespace AutomacaoAnalyticsRift
                 else                              dados.UsuariosMobile  += quantidadeUsuarios;
             }
 
-            double totalDispositivos = dados.UsuariosDesktop + dados.UsuariosMobile;
-            if (totalDispositivos > 0)
+            if (totalUsuariosNumero > 0)
             {
-                dados.PctDesktop = $"{(dados.UsuariosDesktop / totalDispositivos) * 100:F2}%";
-                dados.PctMobile  = $"{(dados.UsuariosMobile  / totalDispositivos) * 100:F2}%";
+                dados.PctDesktop = $"{(dados.UsuariosDesktop / totalUsuariosNumero) * 100:F2}%";
+                dados.PctMobile  = $"{(dados.UsuariosMobile  / totalUsuariosNumero) * 100:F2}%";
             }
 
             PreencherLista(dados.ListaNavegadores, propriedadeGA4, dataInicio, dataFim, "browser",           "activeUsers",    7,  totalUsuariosNumero);
